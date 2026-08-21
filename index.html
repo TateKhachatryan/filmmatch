@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FilmMatch — your film, after a few questions</title>
+<meta name="description" content="Answer four questions. Get four films worth your evening.">
+<meta name="theme-color" content="#fff8ea">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<main class="app">
+
+  <header class="bar">
+    <div class="wordmark">FILMMATCH</div>
+    <div class="dots" id="dots" aria-hidden="true"></div>
+  </header>
+
+  <!-- Intro -->
+  <section class="screen is-on" id="s-intro">
+    <h1 class="display xl">STOP<br>SCROLLING.<br>START<br>WATCHING.</h1>
+    <p class="lede">Four questions. Four films. One good evening — instead of forty minutes of picking.</p>
+    <div class="grow"></div>
+    <button class="btn primary" data-go="s-mood">
+      Find my film
+      <svg viewBox="0 0 24 24" class="ico"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+    </button>
+  </section>
+
+  <!-- Q1 mood -->
+  <section class="screen" id="s-mood">
+    <h1 class="display">WHAT'S<br>THE VIBE?</h1>
+    <div class="tiles" id="opts-mood"></div>
+    <div class="grow"></div>
+    <button class="btn ghost" data-back="s-intro">
+      <svg viewBox="0 0 24 24" class="ico"><path d="M15 18l-6-6 6-6"/></svg>
+      Back
+    </button>
+  </section>
+
+  <!-- Q2 companion -->
+  <section class="screen" id="s-companion">
+    <h1 class="display">WHO'S<br>WATCHING?</h1>
+    <div class="tiles" id="opts-companion"></div>
+    <div class="grow"></div>
+    <button class="btn ghost" data-back="s-mood">
+      <svg viewBox="0 0 24 24" class="ico"><path d="M15 18l-6-6 6-6"/></svg>
+      Back
+    </button>
+  </section>
+
+  <!-- Q3 age -->
+  <section class="screen" id="s-age">
+    <h1 class="display">HOW OLD<br>ARE YOU?</h1>
+    <p class="lede">So we don't put something in front of you that shouldn't be.</p>
+    <div class="rows" id="opts-age"></div>
+    <div class="grow"></div>
+    <button class="btn ghost" data-back="s-companion">
+      <svg viewBox="0 0 24 24" class="ico"><path d="M15 18l-6-6 6-6"/></svg>
+      Back
+    </button>
+  </section>
+
+  <!-- Q4 time -->
+  <section class="screen" id="s-time">
+    <h1 class="display">HOW LONG<br>HAVE YOU<br>GOT?</h1>
+    <div class="rows" id="opts-time"></div>
+    <div class="grow"></div>
+    <button class="btn ghost" data-back="s-age">
+      <svg viewBox="0 0 24 24" class="ico"><path d="M15 18l-6-6 6-6"/></svg>
+      Back
+    </button>
+  </section>
+
+  <!-- Results -->
+  <section class="screen" id="s-results">
+    <h1 class="display">YOUR 4<br>PICKS</h1>
+    <div class="chips" id="answer-chips"></div>
+    <p class="caveat" id="caveat" hidden></p>
+    <div id="hero"></div>
+    <div class="stack" id="rest"></div>
+
+    <div class="feedback" id="feedback">
+      <span>Did these fit?</span>
+      <div class="thumbs">
+        <button class="icobtn" data-vote="up" aria-label="These fit">
+          <svg viewBox="0 0 24 24" class="ico"><path d="M7 11v9H4a1 1 0 01-1-1v-7a1 1 0 011-1z"/><path d="M7 11l4-7a2 2 0 013 1.8V9h4.5a2 2 0 012 2.4l-1.2 6A2 2 0 0117.3 19H7"/></svg>
+        </button>
+        <button class="icobtn" data-vote="down" aria-label="These missed">
+          <svg viewBox="0 0 24 24" class="ico"><path d="M17 13V4h3a1 1 0 011 1v7a1 1 0 01-1 1z"/><path d="M17 13l-4 7a2 2 0 01-3-1.8V15H5.5a2 2 0 01-2-2.4l1.2-6A2 2 0 016.7 5H17"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="grow"></div>
+    <div class="actions">
+      <button class="btn outline" id="more">
+        <svg viewBox="0 0 24 24" class="ico"><path d="M4 12a8 8 0 0113.7-5.7L20 8"/><path d="M20 4v4h-4"/><path d="M20 12a8 8 0 01-13.7 5.7L4 16"/><path d="M4 20v-4h4"/></svg>
+        Four more
+      </button>
+      <button class="btn ghost" data-back="s-intro">Start over</button>
+    </div>
+  </section>
+
+</main>
+
+<script src="data/films.js"></script>
+<script src="match.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

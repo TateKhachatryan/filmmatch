@@ -1,0 +1,860 @@
+<title>FilmMatch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&display=swap">
+<style>
+:root { color-scheme: light; }
+:root {
+  --paper: #fff8ea;
+  --ink: #17140f;
+  --coral: #e03e1f;
+  --coral-deep: #b52f14;
+  --blue: #1f5fd0;
+  --muted: #6b6357;
+  --line: #e0d8c6;
+  --tint: #ffd9cd;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  -webkit-tap-highlight-color: transparent;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+
+.app {
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100svh;
+  padding: max(20px, env(safe-area-inset-top)) 20px
+           calc(24px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0 24px;
+}
+
+.wordmark {
+  font-family: "Archivo Black", "Helvetica Neue", sans-serif;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+}
+
+.dots { display: flex; gap: 5px; }
+.dots i {
+  display: block;
+  width: 24px; height: 8px;
+  border-radius: 4px;
+  background: var(--line);
+  transition: background 160ms ease;
+}
+.dots i.on { background: var(--ink); }
+
+/* Screens */
+.screen { display: none; flex-direction: column; flex-grow: 1; gap: 22px; }
+.screen.is-on { display: flex; animation: rise 260ms cubic-bezier(.2,.7,.3,1) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+.grow { flex-grow: 1; min-height: 12px; }
+
+.display {
+  font-family: "Archivo Black", "Helvetica Neue", sans-serif;
+  font-size: clamp(34px, 11vw, 44px);
+  line-height: 0.97;
+  letter-spacing: -0.03em;
+  margin: 0;
+  text-wrap: balance;
+}
+.display.xl { font-size: clamp(34px, 12.2vw, 52px); }
+
+.lede { font-size: 16px; line-height: 1.5; color: var(--muted); margin: 0; max-width: 30ch; }
+
+/* Option tiles */
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+
+.tile {
+  appearance: none;
+  user-select: none; -webkit-user-select: none;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 20px;
+  padding: 18px;
+  min-height: 118px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  font-family: "Archivo Black", sans-serif;
+  font-size: 18px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 120ms ease, background 120ms ease, color 120ms ease;
+}
+.tile.wide { grid-column: 1 / -1; min-height: 0; flex-direction: row; align-items: center; }
+.tile:active { transform: scale(0.975); }
+.tile .ico { width: 26px; height: 26px; flex: none; }
+
+.tile[data-fill="coral"] { background: var(--coral); border-color: var(--coral); color: var(--paper); }
+.tile[data-fill="ink"]   { background: var(--ink);   border-color: var(--ink);   color: var(--paper); }
+.tile[data-fill="blue"]  { background: var(--blue);  border-color: var(--blue);  color: var(--paper); }
+
+/* Option rows */
+.rows { display: flex; flex-direction: column; gap: 12px; }
+.row {
+  appearance: none;
+  user-select: none; -webkit-user-select: none;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 20px;
+  padding: 18px 20px;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 120ms ease;
+}
+.row:active { transform: scale(0.985); }
+.row b { font-family: "Archivo Black", sans-serif; font-size: 18px; letter-spacing: -0.02em; font-weight: 400; }
+.row span { font-size: 13px; color: var(--muted); }
+
+/* Buttons */
+.btn {
+  appearance: none;
+  user-select: none; -webkit-user-select: none;
+  min-height: 56px;
+  border-radius: 28px;
+  border: 2px solid transparent;
+  font-family: "Archivo Black", sans-serif;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  width: 100%;
+  transition: transform 120ms ease;
+}
+.btn:active { transform: scale(0.985); }
+.btn.primary { background: var(--ink); color: var(--paper); }
+.btn.outline { background: var(--paper); color: var(--ink); border-color: var(--ink); }
+.btn.ghost {
+  background: none; color: var(--muted);
+  font-family: "Space Grotesk", sans-serif; font-weight: 500; font-size: 15px;
+  min-height: 48px;
+}
+
+.ico { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Results */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: -8px; }
+.chip {
+  background: var(--ink); color: var(--paper);
+  border-radius: 14px; padding: 7px 14px;
+  font-size: 13px; font-weight: 500;
+}
+
+.caveat {
+  margin: 0; padding: 13px 15px;
+  background: var(--tint); color: var(--coral-deep);
+  border-radius: 14px; font-size: 14px; line-height: 1.45;
+}
+.caveat b { font-weight: 700; }
+
+.hero { background: var(--coral); border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.hero-top { display: flex; gap: 16px; }
+.hero .art { width: 86px; height: 124px; border-radius: 12px; background: var(--coral-deep); flex: none; }
+.hero h2 {
+  font-family: "Archivo Black", sans-serif; font-weight: 400;
+  font-size: 22px; line-height: 1.02; letter-spacing: -0.02em;
+  color: var(--paper); margin: 0 0 6px;
+}
+.hero .meta { font-size: 13px; font-weight: 500; color: var(--tint); }
+.hero .desc { font-size: 14px; line-height: 1.45; color: var(--tint); margin-top: 10px; }
+.hero .why {
+  background: var(--paper); color: var(--ink);
+  border-radius: 14px; padding: 13px 15px;
+  font-size: 14px; line-height: 1.45;
+}
+.hero .why b { font-weight: 700; }
+.hero-actions { display: flex; gap: 10px; }
+.hero-actions a {
+  flex-grow: 1; min-height: 48px; border-radius: 24px;
+  background: var(--ink); color: var(--paper);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 15px; text-decoration: none;
+}
+.icobtn {
+  appearance: none; border: none; cursor: pointer;
+  width: 48px; height: 48px; border-radius: 24px;
+  background: var(--paper); color: var(--ink);
+  display: flex; align-items: center; justify-content: center;
+}
+.icobtn .ico { width: 20px; height: 20px; }
+
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.card {
+  border: 2px solid var(--ink); border-radius: 20px;
+  padding: 14px; display: flex; gap: 14px; align-items: center;
+  text-decoration: none; color: var(--ink);
+}
+.card .art { width: 52px; height: 74px; border-radius: 8px; flex: none; }
+.card h3 { font-family: "Archivo Black", sans-serif; font-weight: 400; font-size: 16px; letter-spacing: -0.02em; margin: 0 0 4px; }
+.card .meta { font-size: 12px; color: var(--muted); font-weight: 500; margin-bottom: 4px; }
+.card .why { font-size: 13px; line-height: 1.4; }
+.tag {
+  display: inline-block; margin-top: 6px;
+  background: var(--tint); color: var(--coral-deep);
+  border-radius: 10px; padding: 3px 9px; font-size: 11px; font-weight: 700;
+}
+
+.feedback {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 14px 16px;
+  border: 2px solid var(--line); border-radius: 20px;
+  font-size: 14px; color: var(--muted);
+}
+.feedback .thumbs { display: flex; gap: 10px; }
+.feedback .icobtn { border: 2px solid var(--ink); }
+.feedback.done { border-color: var(--ink); color: var(--ink); }
+
+.actions { display: flex; flex-direction: column; gap: 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .screen.is-on { animation: none; }
+  * { transition: none !important; }
+}
+</style>
+<main class="app">
+
+  <header class="bar">
+    <div class="wordmark">FILMMATCH</div>
+    <div class="dots" id="dots" aria-hidden="true"></div>
+  </header>
+
+  <!-- Intro -->
+  <section class="screen is-on" id="s-intro">
+    <h1 class="display xl">STOP<br>SCROLLING.<br>START<br>WATCHING.</h1>
+    <p class="lede">Four questions. Four films. One good evening — instead of forty minutes of picking.</p>
+    <div class="grow"></div>
+    <button class="btn primary" data-go="s-mood">
+      Find my film
+      <svg viewBox="0 0 24 24" class="ico"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+    </button>
+  </section>
+
+  <!-- Q1 mood -->
+  <section class="screen" id="s-mood">
+    <h1 class="display">WHAT'S<br>THE VIBE?</h1>
+    <div class="tiles" id="opts-mood"></div>
+    <div class="grow"></div>
+    <button class="btn ghost" data-back="s-intro">
+      <svg viewBox="0 0 24 24" class="ico"><path d="M15 18l-6-6 6-6"/></svg>
+      Back
+    </button>
+  </section>
+
+  <!-- Q2 companion -->
+  <section class="screen" id="s-companion">
+    <h1 class="display">WHO'S<br>WATCHING?</h1>
+    <div class="tiles" id="opts-companion"></div>
+    <div class="grow"></div>
+    <button class="btn ghost" data-back="s-mood">
+      <svg viewBox="0 0 24 24" class="ico"><path d="M15 18l-6-6 6-6"/></svg>
+      Back
+    </button>
+  </section>
+
+  <!-- Q3 age -->
+  <section class="screen" id="s-age">
+    <h1 class="display">HOW OLD<br>ARE YOU?</h1>
+    <p class="lede">So we don't put something in front of you that shouldn't be.</p>
+    <div class="rows" id="opts-age"></div>
+    <div class="grow"></div>
+    <button class="btn ghost" data-back="s-companion">
+      <svg viewBox="0 0 24 24" class="ico"><path d="M15 18l-6-6 6-6"/></svg>
+      Back
+    </button>
+  </section>
+
+  <!-- Q4 time -->
+  <section class="screen" id="s-time">
+    <h1 class="display">HOW LONG<br>HAVE YOU<br>GOT?</h1>
+    <div class="rows" id="opts-time"></div>
+    <div class="grow"></div>
+    <button class="btn ghost" data-back="s-age">
+      <svg viewBox="0 0 24 24" class="ico"><path d="M15 18l-6-6 6-6"/></svg>
+      Back
+    </button>
+  </section>
+
+  <!-- Results -->
+  <section class="screen" id="s-results">
+    <h1 class="display">YOUR 4<br>PICKS</h1>
+    <div class="chips" id="answer-chips"></div>
+    <p class="caveat" id="caveat" hidden></p>
+    <div id="hero"></div>
+    <div class="stack" id="rest"></div>
+
+    <div class="feedback" id="feedback">
+      <span>Did these fit?</span>
+      <div class="thumbs">
+        <button class="icobtn" data-vote="up" aria-label="These fit">
+          <svg viewBox="0 0 24 24" class="ico"><path d="M7 11v9H4a1 1 0 01-1-1v-7a1 1 0 011-1z"/><path d="M7 11l4-7a2 2 0 013 1.8V9h4.5a2 2 0 012 2.4l-1.2 6A2 2 0 0117.3 19H7"/></svg>
+        </button>
+        <button class="icobtn" data-vote="down" aria-label="These missed">
+          <svg viewBox="0 0 24 24" class="ico"><path d="M17 13V4h3a1 1 0 011 1v7a1 1 0 01-1 1z"/><path d="M17 13l-4 7a2 2 0 01-3-1.8V15H5.5a2 2 0 01-2-2.4l1.2-6A2 2 0 016.7 5H17"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="grow"></div>
+    <div class="actions">
+      <button class="btn outline" id="more">
+        <svg viewBox="0 0 24 24" class="ico"><path d="M4 12a8 8 0 0113.7-5.7L20 8"/><path d="M20 4v4h-4"/><path d="M20 12a8 8 0 01-13.7 5.7L4 16"/><path d="M4 20v-4h4"/></svg>
+        Four more
+      </button>
+      <button class="btn ghost" data-back="s-intro">Start over</button>
+    </div>
+  </section>
+
+</main>
+<script>/* Seed catalog — hand-written so the app works before you run scripts/build-catalog.mjs.
+   The build script overwrites this file with ~600 films pulled from TMDB, same shape.
+   genres are TMDB genre ids (see GENRES in match.js). votes = TMDB vote_count. */
+window.FILMS = [
+  { title: "Green Room", year: 2015, runtime: 95, genres: [53, 27, 80], rating: 6.8, votes: 2400, cert: "R", overview: "A punk band takes the wrong gig at the wrong bar." },
+  { title: "Coherence", year: 2013, runtime: 89, genres: [878, 53, 9648], rating: 7.0, votes: 1300, cert: "NR", overview: "A dinner party goes strange the night a comet passes." },
+  { title: "Nightcrawler", year: 2014, runtime: 117, genres: [53, 80, 18], rating: 7.8, votes: 12000, cert: "R", overview: "A freelance crime cameraman learns how far he'll go for a shot." },
+  { title: "Prisoners", year: 2013, runtime: 153, genres: [53, 18, 80], rating: 8.0, votes: 12000, cert: "R", overview: "Two families and one detective in the days after a disappearance." },
+  { title: "The Invitation", year: 2015, runtime: 100, genres: [53, 27, 9648], rating: 6.6, votes: 1500, cert: "R", overview: "A dinner with old friends where something is quietly off." },
+  { title: "10 Cloverfield Lane", year: 2016, runtime: 103, genres: [53, 27, 878], rating: 7.0, votes: 9000, cert: "PG-13", overview: "A woman wakes in a bunker with a man who says he saved her." },
+  { title: "Searching", year: 2018, runtime: 102, genres: [53, 9648, 18], rating: 7.4, votes: 4000, cert: "PG-13", overview: "A father retraces his missing daughter's digital life." },
+  { title: "Gone Girl", year: 2014, runtime: 149, genres: [53, 9648, 18], rating: 7.9, votes: 15000, cert: "R", overview: "A wife vanishes and her husband becomes the story." },
+  { title: "Sicario", year: 2015, runtime: 121, genres: [28, 80, 53], rating: 7.5, votes: 12000, cert: "R", overview: "An FBI agent joins a task force with unclear rules." },
+  { title: "Good Time", year: 2017, runtime: 101, genres: [53, 80, 18], rating: 7.3, votes: 3500, cert: "R", overview: "One long night of increasingly bad decisions in Queens." },
+  { title: "Parasite", year: 2019, runtime: 133, genres: [53, 80, 18], rating: 8.5, votes: 18000, cert: "R", overview: "One family works its way into another family's house." },
+  { title: "Get Out", year: 2017, runtime: 104, genres: [27, 53, 9648], rating: 7.6, votes: 15000, cert: "R", overview: "A weekend meeting the parents that gets worse by the hour." },
+  { title: "Hereditary", year: 2018, runtime: 127, genres: [27, 18, 9648], rating: 7.3, votes: 8000, cert: "R", overview: "A family's grief opens onto something older." },
+  { title: "A Quiet Place", year: 2018, runtime: 90, genres: [53, 27, 878], rating: 7.4, votes: 12000, cert: "PG-13", overview: "A family survives by never making a sound." },
+  { title: "Talk to Me", year: 2022, runtime: 95, genres: [27, 53], rating: 7.1, votes: 3200, cert: "R", overview: "Teenagers turn a séance into a party trick." },
+  { title: "Barbarian", year: 2022, runtime: 102, genres: [27, 53, 9648], rating: 6.9, votes: 2900, cert: "R", overview: "A rental house with one guest too many." },
+  { title: "The Lighthouse", year: 2019, runtime: 109, genres: [18, 14, 27], rating: 7.3, votes: 5000, cert: "R", overview: "Two keepers, one rock, and a long stretch of bad weather." },
+  { title: "Burning", year: 2018, runtime: 148, genres: [18, 9648], rating: 7.4, votes: 1600, cert: "NR", overview: "A young writer becomes fixated on a stranger's hobby." },
+  { title: "The Handmaiden", year: 2016, runtime: 145, genres: [18, 53, 10749], rating: 8.1, votes: 3500, cert: "R", overview: "A maid is hired into a house built on a con." },
+  { title: "Knives Out", year: 2019, runtime: 130, genres: [9648, 35, 80], rating: 7.9, votes: 15000, cert: "PG-13", overview: "A detective interviews a family with too many motives." },
+  { title: "Hunt for the Wilderpeople", year: 2016, runtime: 101, genres: [35, 12, 18], rating: 7.6, votes: 2300, cert: "PG-13", overview: "A boy and his foster uncle go bush in New Zealand." },
+  { title: "What We Do in the Shadows", year: 2014, runtime: 86, genres: [35, 27], rating: 7.5, votes: 3800, cert: "R", overview: "Flatmate vampires and their household admin." },
+  { title: "Booksmart", year: 2019, runtime: 102, genres: [35], rating: 7.1, votes: 3000, cert: "R", overview: "Two overachievers try to cram four years of fun into one night." },
+  { title: "The Nice Guys", year: 2016, runtime: 116, genres: [35, 80, 28], rating: 7.2, votes: 5200, cert: "R", overview: "A bad private eye and a worse enforcer share a case." },
+  { title: "Palm Springs", year: 2020, runtime: 90, genres: [35, 10749, 878], rating: 7.3, votes: 3000, cert: "R", overview: "Two wedding guests stuck in the same day." },
+  { title: "Game Night", year: 2018, runtime: 100, genres: [35, 80, 53], rating: 7.0, votes: 5000, cert: "R", overview: "A couples' game night with a real kidnapping in it." },
+  { title: "The Grand Budapest Hotel", year: 2014, runtime: 99, genres: [35, 18, 9648], rating: 8.1, votes: 14000, cert: "R", overview: "A concierge, a lobby boy, and a stolen painting." },
+  { title: "Little Miss Sunshine", year: 2006, runtime: 101, genres: [35, 18], rating: 7.8, votes: 8000, cert: "R", overview: "A family drives a failing van to a children's pageant." },
+  { title: "Chef", year: 2014, runtime: 114, genres: [35, 18], rating: 7.4, votes: 4000, cert: "R", overview: "A chef quits a good kitchen for a food truck." },
+  { title: "Paddington 2", year: 2017, runtime: 103, genres: [35, 10751, 12], rating: 7.6, votes: 3500, cert: "PG", overview: "A bear takes odd jobs to buy a birthday present." },
+  { title: "School of Rock", year: 2003, runtime: 109, genres: [35, 10402, 10751], rating: 7.2, votes: 8000, cert: "PG-13", overview: "A failed guitarist substitute-teaches a prep school class." },
+  { title: "About Time", year: 2013, runtime: 123, genres: [35, 18, 10749], rating: 7.8, votes: 8000, cert: "R", overview: "A man who can revisit his own days tries to get love right." },
+  { title: "The Big Sick", year: 2017, runtime: 120, genres: [35, 18, 10749], rating: 7.4, votes: 3000, cert: "R", overview: "A new relationship interrupted by a hospital stay." },
+  { title: "Sing Street", year: 2016, runtime: 106, genres: [18, 10402, 10749], rating: 7.9, votes: 2200, cert: "PG-13", overview: "A Dublin teenager starts a band to impress a girl." },
+  { title: "Before Sunrise", year: 1995, runtime: 101, genres: [18, 10749], rating: 8.1, votes: 6000, cert: "R", overview: "Two strangers walk around Vienna for one night." },
+  { title: "La La Land", year: 2016, runtime: 128, genres: [18, 10402, 10749], rating: 7.9, votes: 16000, cert: "PG-13", overview: "A musician and an actress try to make it in Los Angeles." },
+  { title: "Past Lives", year: 2023, runtime: 106, genres: [18, 10749], rating: 7.8, votes: 2200, cert: "PG-13", overview: "Two childhood friends meet again two decades later." },
+  { title: "Portrait of a Lady on Fire", year: 2019, runtime: 122, genres: [18, 10749], rating: 8.1, votes: 2600, cert: "R", overview: "A painter is hired to capture a bride who won't sit." },
+  { title: "Moonlight", year: 2016, runtime: 111, genres: [18], rating: 7.4, votes: 6000, cert: "R", overview: "Three chapters in one man's life in Miami." },
+  { title: "Whiplash", year: 2014, runtime: 107, genres: [18, 10402], rating: 8.4, votes: 14000, cert: "R", overview: "A drummer and a teacher who believes in pressure." },
+  { title: "Sound of Metal", year: 2019, runtime: 120, genres: [18, 10402], rating: 7.7, votes: 3200, cert: "R", overview: "A drummer starts to lose his hearing." },
+  { title: "Aftersun", year: 2022, runtime: 102, genres: [18], rating: 7.2, votes: 1400, cert: "R", overview: "A holiday with her father, remembered years on." },
+  { title: "The Social Network", year: 2010, runtime: 121, genres: [18, 36], rating: 7.7, votes: 13000, cert: "PG-13", overview: "How a dorm-room site became a company, and a lawsuit." },
+  { title: "Arrival", year: 2016, runtime: 116, genres: [878, 18, 9648], rating: 7.6, votes: 17000, cert: "PG-13", overview: "A linguist is asked to talk to visitors nobody understands." },
+  { title: "Ex Machina", year: 2014, runtime: 108, genres: [878, 18, 53], rating: 7.6, votes: 15000, cert: "R", overview: "A programmer is flown out to test an AI." },
+  { title: "Blade Runner 2049", year: 2017, runtime: 164, genres: [878, 18], rating: 7.5, votes: 13000, cert: "R", overview: "A blade runner follows a secret buried thirty years." },
+  { title: "Dune", year: 2021, runtime: 155, genres: [878, 12], rating: 7.8, votes: 12000, cert: "PG-13", overview: "A family takes stewardship of the most dangerous planet there is." },
+  { title: "Everything Everywhere All at Once", year: 2022, runtime: 139, genres: [28, 12, 878], rating: 7.8, votes: 9000, cert: "R", overview: "A laundromat owner is asked to save every version of herself." },
+  { title: "Mad Max: Fury Road", year: 2015, runtime: 120, genres: [28, 12, 878], rating: 7.6, votes: 21000, cert: "R", overview: "One long chase across the desert." },
+  { title: "Spider-Man: Into the Spider-Verse", year: 2018, runtime: 117, genres: [16, 28, 12], rating: 8.4, votes: 14000, cert: "PG", overview: "A Brooklyn teenager meets the other Spider-People." },
+  { title: "Spirited Away", year: 2001, runtime: 125, genres: [16, 14, 12], rating: 8.5, votes: 16000, cert: "PG", overview: "A girl takes a job in a bathhouse for spirits." },
+  { title: "My Neighbor Totoro", year: 1988, runtime: 86, genres: [16, 10751, 14], rating: 8.1, votes: 6000, cert: "G", overview: "Two sisters move to the country and meet what lives there." },
+  { title: "Kiki's Delivery Service", year: 1989, runtime: 103, genres: [16, 10751, 14], rating: 7.8, votes: 3400, cert: "G", overview: "A young witch sets up a delivery business." },
+  { title: "Coco", year: 2017, runtime: 105, genres: [16, 10751, 12], rating: 8.2, votes: 18000, cert: "PG", overview: "A boy who wants to play music crosses into the land of the dead." },
+  { title: "Klaus", year: 2019, runtime: 96, genres: [16, 10751, 35], rating: 8.2, votes: 4000, cert: "PG", overview: "The worst postman in the service is posted to the coldest town." },
+  { title: "WALL-E", year: 2008, runtime: 98, genres: [16, 10751, 878], rating: 8.1, votes: 18000, cert: "G", overview: "A cleaning robot keeps working long after everyone left." },
+  { title: "The Mitchells vs. the Machines", year: 2021, runtime: 114, genres: [16, 35, 10751], rating: 7.7, votes: 3000, cert: "PG", overview: "A family road trip during the robot uprising." },
+  { title: "Free Solo", year: 2018, runtime: 100, genres: [99], rating: 7.9, votes: 1600, cert: "PG-13", overview: "A climber prepares to go up El Capitan without a rope." },
+  { title: "Won't You Be My Neighbor?", year: 2018, runtime: 94, genres: [99], rating: 8.0, votes: 900, cert: "PG-13", overview: "How Fred Rogers made television for children." },
+  { title: "Apollo 11", year: 2019, runtime: 93, genres: [99, 36], rating: 7.8, votes: 700, cert: "G", overview: "The first Moon landing, from restored mission footage." }
+];
+</script>
+<script>/* FilmMatch — matching engine.
+   Pure scoring, no network, no LLM. Every result can explain why it ranked. */
+
+const GENRES = {
+  28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy", 80: "Crime",
+  99: "Documentary", 18: "Drama", 10751: "Family", 14: "Fantasy", 36: "History",
+  27: "Horror", 10402: "Music", 9648: "Mystery", 10749: "Romance", 878: "Sci-fi",
+  53: "Thriller", 10752: "War", 37: "Western"
+};
+
+/* Mood weights per genre. Overlaps are intentional — this scores, it doesn't filter. */
+const MOOD = {
+  laugh:     { 35: 3, 16: 1, 10751: 1, 12: 1 },
+  /* Horror leads, but thriller and mystery carry the bucket for the age groups
+     and rooms where horror is blocked outright. */
+  scared:    { 27: 3, 53: 2, 9648: 1, 878: 1 },
+  romantic:  { 10749: 3, 18: 1, 35: 1, 10402: 1, 14: 1 },
+  light:     { 35: 2, 10751: 2, 16: 2, 12: 1, 10402: 1, 10749: 1 },
+  thinking:  { 878: 2, 18: 2, 9648: 2, 99: 2, 36: 1 }
+};
+
+const MOOD_LABEL = {
+  laugh: "make you laugh", scared: "scare you", romantic: "something romantic",
+  light: "nothing heavy", thinking: "make you think"
+};
+
+/* Who you're with. Positive = fits, negative = wrong room. */
+const COMPANION = {
+  alone:   { 18: 1, 99: 1, 878: 1 },
+  partner: { 10749: 2, 18: 1, 35: 1, 10752: -2, 27: -1 },
+  friends: { 35: 2, 27: 2, 28: 1, 53: 1, 99: -2, 18: -1 },
+  family:  { 10751: 3, 16: 2, 12: 1, 27: -4, 80: -2 }
+};
+
+const COMPANION_LABEL = {
+  alone: "on your own", partner: "with your partner",
+  friends: "with friends", family: "with family"
+};
+
+const TIME_LABEL = { short: "under 90 min", medium: "90–120 min", any: "any length" };
+
+const AGE_LABEL = { kid: "under 13", teen: "13–17", adult: "18 or over" };
+
+const ADULT_CERTS = ["R", "NC-17", "18", "TV-MA"];
+
+/* Certification as a number so we can compare it against an age ceiling.
+   An unrated film is treated as adult — unknown is not the same as safe. */
+const CERT_RANK = {
+  "G": 0, "TV-G": 0, "TV-Y": 0, "TV-Y7": 0,
+  "PG": 1, "TV-PG": 1,
+  "PG-13": 2, "TV-14": 2,
+  "R": 3, "TV-MA": 3, "18": 3,
+  "NC-17": 4
+};
+const certRank = film => CERT_RANK[film.cert] !== undefined ? CERT_RANK[film.cert] : 3;
+
+/* The highest certification each age group may be shown. */
+const AGE_CEILING = { kid: 1, teen: 2, adult: 4 };
+
+/* TMDB lists genres primary-first, so position carries real signal: a thriller
+   with a drama tag is not the same film as a drama with a thriller tag. */
+const POSITION = [1.6, 1, 0.6];
+const positionWeight = i => POSITION[i] !== undefined ? POSITION[i] : 0.4;
+
+function weighted(film, table) {
+  return film.genres.reduce(
+    (sum, g, i) => sum + (table[g] || 0) * positionWeight(i), 0
+  );
+}
+
+function moodScore(film, mood) {
+  return weighted(film, MOOD[mood] || {});
+}
+
+function companionScore(film, companion) {
+  return weighted(film, COMPANION[companion] || {});
+}
+
+/* The genre that actually earned the mood score — never just genres[0]. */
+function moodGenre(film, mood) {
+  const w = MOOD[mood] || {};
+  let best = null, bestVal = 0;
+  film.genres.forEach((g, i) => {
+    const val = (w[g] || 0) * positionWeight(i);
+    if (val > bestVal) { bestVal = val; best = g; }
+  });
+  return best ? GENRES[best] : null;
+}
+
+function runtimeScore(film, time) {
+  if (time === "short") return film.runtime <= 90 ? 3 : film.runtime <= 100 ? 1 : -2;
+  if (time === "medium") return film.runtime <= 120 ? 2 : film.runtime <= 135 ? 0 : -3;
+  return film.runtime >= 100 ? 1 : 0;
+}
+
+/* Good but under-seen. This is Discovery Mode. */
+function isDiscovery(film) {
+  return film.votes < 4000 && film.rating >= 7;
+}
+
+/* Hard rules. Getting these wrong loses trust in a way a bad rank never does. */
+function allowed(film, answers) {
+  const ceiling = AGE_CEILING[answers.age];
+  if (ceiling !== undefined && certRank(film) > ceiling) return false;
+  if (answers.age === "kid" && film.genres.includes(27)) return false;
+
+  if (answers.companion === "family") {
+    if (film.genres.includes(27)) return false;
+    if (ADULT_CERTS.includes(film.cert)) return false;
+  }
+  if (answers.time === "short" && film.runtime > 105) return false;
+  if (answers.time === "medium" && film.runtime > 145) return false;
+  return true;
+}
+
+/* Mood claims are phrased from the MOOD, never from a genre label the film
+   happens to carry — otherwise "wreck me" comes back as "the thriller you
+   asked for" and the explanation is simply untrue. */
+const MOOD_CLAIM = {
+  laugh:    g => g === "Comedy" ? "it's a comedy that actually lands" : "it should get a laugh out of you",
+  scared:   g => g === "Horror" ? "it's horror, no apologies" : "it's built to unsettle you",
+  romantic: g => g === "Romance" ? "it's a proper love story" : "there's real romance in it",
+  light:    () => "it's easy watching, nothing demanding",
+  thinking: g => g === "Documentary" ? "it's a documentary that stays with you" : "it leaves you something to chew on"
+};
+
+/* One honest sentence, assembled only from signals that actually scored.
+   `index` rotates which signal leads so four cards don't read identically. */
+function explain(film, answers, index) {
+  const bits = [];
+
+  if (moodScore(film, answers.mood) >= 3) {
+    bits.push(MOOD_CLAIM[answers.mood](moodGenre(film, answers.mood)));
+  }
+  if (answers.time === "short" && film.runtime <= 90) {
+    bits.push(`it's done in ${film.runtime} minutes`);
+  } else if (answers.time === "medium" && film.runtime <= 120) {
+    bits.push(`${film.runtime} minutes fits the evening you've got`);
+  } else if (answers.time === "any" && film.runtime > 130) {
+    bits.push(`it takes its ${film.runtime} minutes and uses them`);
+  }
+  if (answers.companion === "family" && film.genres.includes(10751)) {
+    bits.push("nobody has to leave the room");
+  } else if (answers.companion === "friends" && (film.genres.includes(35) || film.genres.includes(27))) {
+    bits.push("it plays better with other people in the room");
+  } else if (answers.companion === "partner" && (film.genres.includes(10749) || film.genres.includes(18))) {
+    bits.push("it works for two");
+  } else if (answers.companion === "alone" && (film.genres.includes(99) || film.genres.includes(18))) {
+    bits.push("it asks for your full attention");
+  }
+  if (answers.age === "kid" && film.genres.includes(10751)) {
+    bits.push("it's made for your age group");
+  }
+  if (isDiscovery(film)) {
+    bits.push("almost nobody has seen it");
+  }
+  if (!bits.length) {
+    bits.push("it's the closest thing we have to what you picked");
+  }
+
+  const rotated = bits.slice(index % bits.length).concat(bits.slice(0, index % bits.length));
+  const sentence = rotated.slice(0, 2).join(" and ");
+  return sentence.charAt(0).toUpperCase() + sentence.slice(1) + ".";
+}
+
+function scoreFilm(film, answers) {
+  return moodScore(film, answers.mood) * 3
+    + companionScore(film, answers.companion)
+    + runtimeScore(film, answers.time)
+    + (film.rating - 6) * 0.5
+    + (isDiscovery(film) ? 1 : 0);
+}
+
+/* Returns 4 films. Same answers twice should not give an identical list, so we
+   shuffle a wider shortlist — it also powers "show four more". */
+function match(films, answers, opts) {
+  const count = (opts && opts.count) || 4;
+  const exclude = (opts && opts.exclude) || [];
+
+  const eligible = films
+    .filter(f => allowed(f, answers))
+    .filter(f => !exclude.includes(f.title));
+
+  /* A film that barely registers on the chosen mood has no business here —
+     but never starve the result set to enforce it. */
+  const onMood = eligible.filter(f => moodScore(f, answers.mood) >= 1.5);
+  const ranked = (onMood.length >= count ? onMood : eligible)
+    .map(f => ({ film: f, score: scoreFilm(f, answers) }))
+    .sort((a, b) => b.score - a.score);
+
+  /* The top match is always the top match — only the rest of the shortlist
+     gets shuffled, so a repeat run varies without demoting the best answer. */
+  const [best, ...others] = ranked;
+  if (!best) return [];
+
+  const pool = others.slice(0, Math.max(count * 3, 12));
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+
+  return [best, ...pool].slice(0, count).map((entry, i) => ({
+    ...entry.film,
+    genreNames: entry.film.genres.map(g => GENRES[g]).filter(Boolean),
+    discovery: isDiscovery(entry.film),
+    onMood: moodScore(entry.film, answers.mood) >= 3,
+    why: explain(entry.film, answers, i)
+  }));
+}
+
+window.FilmMatch = { match, GENRES, MOOD_LABEL, COMPANION_LABEL, TIME_LABEL, AGE_LABEL };
+</script>
+<script>/* FilmMatch — screen flow and rendering. */
+
+const I = {
+  laugh: '<path d="M12 3a9 9 0 100 18 9 9 0 000-18z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01M15 9h.01"/>',
+  scared: '<path d="M18 20V10a6 6 0 00-12 0v10l2-2 2 2 2-2 2 2 2-2z"/><path d="M9.5 10h.01M14.5 10h.01"/>',
+  romantic: '<path d="M12 20s-7-4.4-7-9.4A4 4 0 0112 8a4 4 0 017 2.6c0 5-7 9.4-7 9.4z"/>',
+  light: '<path d="M12 8a4 4 0 100 8 4 4 0 000-8z"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M6 6l1.5 1.5M16.5 16.5L18 18M18 6l-1.5 1.5M7.5 16.5L6 18"/>',
+  thinking: '<path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 00-3.5 10.9c.3.3.5.7.5 1.1v0h6v0c0-.4.2-.8.5-1.1A6 6 0 0012 3z"/>',
+  alone: '<path d="M12 12a4 4 0 100-8 4 4 0 000 8z"/><path d="M5 21c0-3.9 3.1-7 7-7s7 3.1 7 7"/>',
+  partner: '<path d="M12 20s-7-4.4-7-9.4A4 4 0 0112 8a4 4 0 017 2.6c0 5-7 9.4-7 9.4z"/>',
+  friends: '<path d="M9 12a3.5 3.5 0 100-7 3.5 3.5 0 000 7z"/><path d="M2 21c0-3.4 3.1-6 7-6s7 2.6 7 6"/><path d="M17 6.5a3 3 0 010 6"/><path d="M18 15c2.4.6 4 2.2 4 4"/>',
+  family: '<path d="M4 21v-9l8-6 8 6v9"/><path d="M9 21v-6h6v6"/>'
+};
+
+const QUESTIONS = {
+  mood: {
+    screen: "s-mood", next: "s-companion",
+    options: [
+      { key: "laugh",    label: "MAKE ME\nLAUGH",   fill: "coral", icon: "laugh" },
+      { key: "scared",   label: "MAKE ME\nSCARED",  fill: "ink",   icon: "scared" },
+      { key: "romantic", label: "SOMETHING\nROMANTIC", fill: "blue", icon: "romantic" },
+      { key: "light",    label: "NOTHING\nHEAVY",    fill: "",      icon: "light" },
+      { key: "thinking", label: "MAKE ME THINK",     fill: "",      icon: "thinking", wide: true }
+    ]
+  },
+  companion: {
+    screen: "s-companion", next: "s-age",
+    options: [
+      { key: "alone",   label: "ON MY\nOWN",       fill: "ink",   icon: "alone" },
+      { key: "partner", label: "WITH MY\nPARTNER", fill: "coral", icon: "partner" },
+      { key: "friends", label: "WITH\nFRIENDS",    fill: "blue",  icon: "friends" },
+      { key: "family",  label: "WITH\nFAMILY",     fill: "",      icon: "family" }
+    ]
+  },
+  age: {
+    screen: "s-age", next: "s-time",
+    options: [
+      { key: "kid",   label: "UNDER 13", note: "Nothing above a PG" },
+      { key: "teen",  label: "13–17",    note: "Up to a PG-13" },
+      { key: "adult", label: "18 OR OVER", note: "Anything goes" }
+    ]
+  },
+  time: {
+    screen: "s-time", next: "s-results",
+    options: [
+      { key: "short",  label: "UNDER 90 MIN", note: "In and out" },
+      { key: "medium", label: "90–120 MIN",   note: "A normal evening" },
+      { key: "any",    label: "AS LONG AS IT TAKES", note: "Length is not the problem" }
+    ]
+  }
+};
+
+const state = { answers: {}, shown: [], seen: [] };
+const $ = sel => document.querySelector(sel);
+
+/* --- build the option UI --- */
+
+function svg(name, cls) {
+  return '<svg viewBox="0 0 24 24" class="' + cls + '">' + I[name] + "</svg>";
+}
+
+function buildTiles(qKey) {
+  const q = QUESTIONS[qKey];
+  const host = $("#opts-" + qKey);
+  host.innerHTML = "";
+  q.options.forEach(opt => {
+    const b = document.createElement("button");
+    b.className = "tile" + (opt.wide ? " wide" : "");
+    if (opt.fill) b.dataset.fill = opt.fill;
+    b.innerHTML = svg(opt.icon, "ico") +
+      '<span>' + opt.label.replace(/\n/g, "<br>") + "</span>";
+    b.addEventListener("click", () => answer(qKey, opt.key));
+    host.appendChild(b);
+  });
+}
+
+function buildRows(qKey) {
+  const q = QUESTIONS[qKey];
+  const host = $("#opts-" + qKey);
+  host.innerHTML = "";
+  q.options.forEach(opt => {
+    const b = document.createElement("button");
+    b.className = "row";
+    b.innerHTML = "<span><b>" + opt.label + "</b><br><span>" + opt.note + "</span></span>" +
+      '<svg viewBox="0 0 24 24" class="ico"><path d="M5 12h13M13 6l6 6-6 6"/></svg>';
+    b.addEventListener("click", () => answer(qKey, opt.key));
+    host.appendChild(b);
+  });
+}
+
+/* --- flow --- */
+
+function show(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-on", s.id === id));
+  window.scrollTo({ top: 0 });
+  const steps = ["s-mood", "s-companion", "s-age", "s-time"];
+  const step = steps.indexOf(id);
+  const dots = $("#dots");
+  dots.innerHTML = "";
+  if (step >= 0) {
+    for (let i = 0; i < steps.length; i++) {
+      const d = document.createElement("i");
+      if (i <= step) d.className = "on";
+      dots.appendChild(d);
+    }
+  }
+}
+
+function answer(qKey, value) {
+  state.answers[qKey] = value;
+  const next = QUESTIONS[qKey].next;
+  if (next === "s-results") {
+    state.seen = [];
+    render();
+  }
+  show(next);
+}
+
+function reset() {
+  state.answers = {};
+  state.seen = [];
+}
+
+/* --- results --- */
+
+const ART = ["#b52f14", "#1f5fd0", "#17140f", "#d9a34a", "#3f6b58", "#7a2f6b"];
+
+function watchLink(film) {
+  return "https://www.justwatch.com/us/search?q=" + encodeURIComponent(film.title);
+}
+
+function metaLine(film) {
+  return film.year + " · " + film.genreNames[0] + " · " + film.runtime + " min";
+}
+
+function render() {
+  const a = state.answers;
+  const picks = window.FilmMatch.match(window.FILMS, a, { count: 4, exclude: state.seen });
+  state.shown = picks;
+  state.seen = state.seen.concat(picks.map(p => p.title));
+
+  const L = window.FilmMatch;
+  $("#answer-chips").innerHTML = [
+    L.MOOD_LABEL[a.mood], L.COMPANION_LABEL[a.companion],
+    L.AGE_LABEL[a.age], L.TIME_LABEL[a.time]
+  ].map(t => '<span class="chip">' + t + "</span>").join("");
+
+  if (!picks.length) {
+    $("#hero").innerHTML = '<p class="lede">That\'s everything we have for those answers. Try a different mood.</p>';
+    $("#rest").innerHTML = "";
+    return;
+  }
+
+  const offMood = !picks.some(f => f.onMood);
+  $("#caveat").innerHTML = offMood
+    ? "Nothing that fits <b>" + L.MOOD_LABEL[a.mood] +
+      "</b> clears the age rating you picked. These are the closest we can offer."
+    : "";
+  $("#caveat").hidden = !offMood;
+
+  const top = picks[0];
+  $("#hero").innerHTML =
+    '<div class="hero">' +
+      '<div class="hero-top">' +
+        '<div class="art" style="background:' + ART[0] + '"></div>' +
+        "<div><h2>" + top.title.toUpperCase() + '</h2><div class="meta">' + metaLine(top) +
+        '</div><div class="desc">' + top.overview + "</div></div>" +
+      "</div>" +
+      '<div class="why"><b>Why this one:</b> ' + top.why + "</div>" +
+      '<div class="hero-actions">' +
+        '<a href="' + watchLink(top) + '" target="_blank" rel="noopener">Where to watch</a>' +
+        '<button class="icobtn" id="share" aria-label="Share this pick">' +
+          '<svg viewBox="0 0 24 24" class="ico"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7"/><path d="M12 3v12M8 7l4-4 4 4"/></svg>' +
+        "</button>" +
+      "</div>" +
+    "</div>";
+
+  $("#rest").innerHTML = picks.slice(1).map((f, i) =>
+    '<a class="card" href="' + watchLink(f) + '" target="_blank" rel="noopener">' +
+      '<div class="art" style="background:' + ART[(i + 1) % ART.length] + '"></div>' +
+      "<div><h3>" + f.title.toUpperCase() + "</h3>" +
+      '<div class="meta">' + f.year + " · " + f.runtime + " min</div>" +
+      '<div class="why">' + f.why + "</div>" +
+      (f.discovery ? '<span class="tag">Lesser known</span>' : "") +
+      "</div>" +
+    "</a>"
+  ).join("");
+
+  const fb = $("#feedback");
+  fb.classList.remove("done");
+  fb.querySelector("span").textContent = "Did these fit?";
+
+  const share = $("#share");
+  if (share) share.addEventListener("click", () => shareTop(top));
+}
+
+function shareTop(film) {
+  const text = "FilmMatch says: " + film.title + " (" + film.year + "). " + film.why;
+  if (navigator.share) {
+    navigator.share({ title: "FilmMatch", text: text, url: location.href }).catch(() => {});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(text + " " + location.href);
+    const fb = $("#feedback");
+    fb.querySelector("span").textContent = "Copied — send it to whoever you're watching with.";
+  }
+}
+
+/* Feedback is logged locally for now. Point this at your endpoint when you have one. */
+function logVote(vote) {
+  const entry = { answers: state.answers, titles: state.shown.map(f => f.title), vote: vote };
+  const all = JSON.parse(localStorage.getItem("fm-votes") || "[]");
+  all.push(entry);
+  localStorage.setItem("fm-votes", JSON.stringify(all));
+}
+
+/* --- wiring --- */
+
+buildTiles("mood");
+buildTiles("companion");
+buildRows("age");
+buildRows("time");
+
+document.querySelectorAll("[data-go]").forEach(b =>
+  b.addEventListener("click", () => show(b.dataset.go)));
+
+document.querySelectorAll("[data-back]").forEach(b =>
+  b.addEventListener("click", () => {
+    if (b.dataset.back === "s-intro") reset();
+    show(b.dataset.back);
+  }));
+
+$("#more").addEventListener("click", render);
+
+document.querySelectorAll("[data-vote]").forEach(b =>
+  b.addEventListener("click", () => {
+    logVote(b.dataset.vote);
+    const fb = $("#feedback");
+    fb.classList.add("done");
+    fb.querySelector("span").textContent =
+      b.dataset.vote === "up" ? "Good — noted." : "Noted. Try four more.";
+  }));
+
+show("s-intro");
+</script>
