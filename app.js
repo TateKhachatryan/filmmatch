@@ -180,7 +180,7 @@ function metaLine(film) {
     film.genreNames[0],
     film.runtime + " min",
     window.FilmMatch.certLabel(film)
-  ].join(" · ");
+  ].filter(Boolean).join(" · ");
 }
 
 /* "Already seen" — only for signed-in viewers. The card is a link, so the

@@ -54,17 +54,14 @@ const CERT_RANK = {
 };
 const certRank = film => CERT_RANK[film.cert] !== undefined ? CERT_RANK[film.cert] : 3;
 
-/* Certificates as age labels. Only where the certificate genuinely carries an
-   age: PG means parental guidance, not a number, so inventing "7+" would be a
-   lie. Unrated stays "NR" rather than implying it is safe. */
+/* Certificates as age ranges. PG and unrated show nothing rather than a
+   guess: PG carries no age, and unrated means unknown, not suitable. */
 const CERT_LABEL = {
-  "G": "All ages", "TV-G": "All ages", "TV-Y": "All ages", "TV-Y7": "All ages",
-  "PG": "PG", "TV-PG": "PG",
+  "G": "0+", "TV-G": "0+", "TV-Y": "0+", "TV-Y7": "0+",
   "PG-13": "13+", "TV-14": "13+",
-  "R": "17+", "TV-MA": "17+", "18": "18+",
-  "NC-17": "18+"
+  "R": "18+", "NC-17": "18+", "TV-MA": "18+", "18": "18+"
 };
-const certLabel = film => CERT_LABEL[film.cert] || "NR";
+const certLabel = film => CERT_LABEL[film.cert] || "";
 
 /* The highest certification each age group may be shown. */
 const AGE_CEILING = { kid: 1, teen: 2, adult: 4 };
