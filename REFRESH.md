@@ -30,18 +30,26 @@ can't work with. That is what would have caught the first fetch, which returned
 
 ### Secrets to add
 
-Repository → Settings → Secrets and variables → Actions:
+Repository → Settings → Secrets and variables → Actions → Secrets tab. Use
+repository secrets, not environment secrets: environments exist to gate a deploy
+behind an approval, which would stall the monthly run rather than help it.
 
 | Secret | Value |
 | --- | --- |
 | `TMDB_KEY` | Your TMDB v3 API key |
-| `VERCEL_TOKEN` | From vercel.com/account/tokens |
+
+That is the only secret needed, because the repo is connected to Vercel through
+its GitHub integration: the workflow's own commit triggers the deploy.
+
+The workflow keeps a CLI deploy step as a fallback, skipped unless
+`VERCEL_TOKEN` is set. If the git integration is ever removed, add these three
+and it takes over:
+
+| Secret | Value |
+| --- | --- |
+| `VERCEL_TOKEN` | From vercel.com/account/tokens, scoped to the team that owns the project |
 | `VERCEL_ORG_ID` | `team_wB5LOlMFyS65ohuGG8wu9kxO` |
 | `VERCEL_PROJECT_ID` | `prj_XHHeuPoQYYoTf02PTe5GUi2V4pfg` |
-
-If you connect the repo to Vercel instead, the three Vercel secrets are
-unnecessary — the workflow's push deploys on its own, and the deploy step skips
-itself when `VERCEL_TOKEN` is absent.
 
 ## Tuning what gets fetched
 

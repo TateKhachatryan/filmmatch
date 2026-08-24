@@ -13,6 +13,10 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    # Hoisted to the job so the deploy step can test it in its `if`. Neither
+    # `secrets` nor a step's own `env` is readable from a step-level condition.
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -45,13 +49,13 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      # Only needed while the Vercel project is CLI-deployed. If you connect the
-      # repo to Vercel, the push above deploys on its own and this step is a
-      # no-op — it skips itself when VERCEL_TOKEN isn't set.
-      - name: Deploy to Vercel
-        if: steps.commit.outputs.changed == 'true' && secrets.VERCEL_TOKEN != ''
+      # With the repo connected to Vercel, the push above deploys on its own and
+      # this step stays skipped. It is a fallback: set VERCEL_TOKEN as a secret
+      # and it takes over, so a broken git connection can't silently leave the
+      # site serving an old catalog.
+      - name: Deploy to Vercel (only without the git integration)
+        if: steps.commit.outputs.changed == 'true' && env.VERCEL_TOKEN != ''
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: npx vercel deploy --prod --yes --token "$VERCEL_TOKEN"
