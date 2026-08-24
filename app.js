@@ -125,6 +125,16 @@ function reset() {
 
 const ART = ["#b52f14", "#1f5fd0", "#17140f", "#d9a34a", "#3f6b58", "#7a2f6b"];
 
+/* TMDB gives us a poster path; the seed catalog has none, so every poster
+   falls back to the flat colour block rather than a broken image. */
+function artHTML(film, colour, cls) {
+  if (!film.poster) return '<div class="' + cls + '" style="background:' + colour + '"></div>';
+  return '<img class="' + cls + '" alt="" loading="lazy" style="background:' + colour +
+    '" src="https://image.tmdb.org/t/p/w342' + film.poster +
+    '" onerror="this.replaceWith(Object.assign(document.createElement(\'div\'),' +
+    '{className:\'' + cls + '\',style:\'background:' + colour + '\'}))">';
+}
+
 function watchLink(film) {
   return "https://www.justwatch.com/us/search?q=" + encodeURIComponent(film.title);
 }
@@ -162,7 +172,7 @@ function render() {
   $("#hero").innerHTML =
     '<div class="hero">' +
       '<div class="hero-top">' +
-        '<div class="art" style="background:' + ART[0] + '"></div>' +
+        artHTML(top, ART[0], "art") +
         "<div><h2>" + top.title.toUpperCase() + '</h2><div class="meta">' + metaLine(top) +
         '</div><div class="desc">' + top.overview + "</div></div>" +
       "</div>" +
@@ -177,7 +187,7 @@ function render() {
 
   $("#rest").innerHTML = picks.slice(1).map((f, i) =>
     '<a class="card" href="' + watchLink(f) + '" target="_blank" rel="noopener">' +
-      '<div class="art" style="background:' + ART[(i + 1) % ART.length] + '"></div>' +
+      artHTML(f, ART[(i + 1) % ART.length], "art") +
       "<div><h3>" + f.title.toUpperCase() + "</h3>" +
       '<div class="meta">' + f.year + " · " + f.runtime + " min</div>" +
       '<div class="why">' + f.why + "</div>" +

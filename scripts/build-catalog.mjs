@@ -20,9 +20,22 @@ if (!KEY) {
   process.exit(1);
 }
 
-const get = async path => {
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* TMDB rate-limits in bursts. Back off and retry rather than losing films. */
+const get = async (path, attempt = 0) => {
   const sep = path.includes("?") ? "&" : "?";
   const res = await fetch(`${BASE}${path}${sep}api_key=${KEY}`);
+
+  if (res.status === 429 && attempt < 5) {
+    const wait = Number(res.headers.get("retry-after") || 2) * 1000;
+    await sleep(wait);
+    return get(path, attempt + 1);
+  }
+  if (res.status === 401) {
+    console.error("\nTMDB rejected the key. Check TMDB_KEY is the v3 API key.");
+    process.exit(1);
+  }
   if (!res.ok) throw new Error(`${res.status} on ${path}`);
   return res.json();
 };
