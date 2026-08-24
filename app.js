@@ -286,17 +286,17 @@ function renderAccount(googleOn) {
   el.hidden = false;
 
   if (!FM.auth.isSignedIn()) {
-    el.innerHTML = '<button class="acct-btn" id="signin">Sign in</button>';
+    el.innerHTML = '<button class="acct-link" id="signin">Sign in</button>';
     $("#signin").addEventListener("click", () => FM.auth.signIn());
     return;
   }
 
   const avatar = FM.auth.avatar();
   el.innerHTML =
-    '<button class="acct-btn" id="profile-open" aria-label="Your already-seen films">' +
+    '<button class="acct-me" id="profile-open" aria-label="Your already-seen films">' +
       (avatar ? '<img src="' + avatar + '" alt="" class="avatar">'
               : '<span class="avatar avatar-fallback">' + FM.auth.name().charAt(0).toUpperCase() + "</span>") +
-      "<span>" + FM.auth.seenList().length + " seen</span>" +
+      '<span class="count">' + FM.auth.seenList().length + " seen</span>" +
     "</button>";
   $("#profile-open").addEventListener("click", () => {
     renderProfile();
