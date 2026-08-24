@@ -189,7 +189,7 @@ function render() {
     '<a class="card" href="' + watchLink(f) + '" target="_blank" rel="noopener">' +
       artHTML(f, ART[(i + 1) % ART.length], "art") +
       "<div><h3>" + f.title.toUpperCase() + "</h3>" +
-      '<div class="meta">' + f.year + " · " + f.runtime + " min</div>" +
+      '<div class="meta">' + metaLine(f) + "</div>" +
       '<div class="why">' + f.why + "</div>" +
       (f.discovery ? '<span class="tag">Lesser known</span>' : "") +
       "</div>" +
