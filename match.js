@@ -57,6 +57,16 @@ const certRank = film => CERT_RANK[film.cert] !== undefined ? CERT_RANK[film.cer
 /* The highest certification each age group may be shown. */
 const AGE_CEILING = { kid: 1, teen: 2, adult: 4 };
 
+/* A PG from 1954 is not a PG from 2024 — Dial M for Murder and Rope are both
+   rated PG. For under-13s the certificate alone is not enough: the film also
+   has to be the kind of thing made for children. */
+const KID_GENRES = [10751, 16, 12, 14, 35];
+
+/* How many under-seen films may appear in one set of four. The gem pass makes
+   obscure films plentiful, and without a cap every result is one — which reads
+   as evasive rather than curated. */
+const MAX_DISCOVERY = 2;
+
 /* TMDB lists genres primary-first, so position carries real signal: a thriller
    with a drama tag is not the same film as a drama with a thriller tag. */
 const POSITION = [1.6, 1, 0.6];
@@ -102,7 +112,10 @@ function isDiscovery(film) {
 function allowed(film, answers) {
   const ceiling = AGE_CEILING[answers.age];
   if (ceiling !== undefined && certRank(film) > ceiling) return false;
-  if (answers.age === "kid" && film.genres.includes(27)) return false;
+  if (answers.age === "kid") {
+    if (film.genres.includes(27)) return false;
+    if (!film.genres.some(g => KID_GENRES.includes(g))) return false;
+  }
 
   if (answers.companion === "family") {
     if (film.genres.includes(27)) return false;
@@ -199,7 +212,20 @@ function match(films, answers, opts) {
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
 
-  return [best, ...pool].slice(0, count).map((entry, i) => ({
+  /* Fill the set, keeping discovery picks to a minority so each result still
+     has films people recognise. Relaxes if the cap can't be met. */
+  const chosen = [best];
+  let discoveryCount = isDiscovery(best.film) ? 1 : 0;
+  const skipped = [];
+  for (const entry of pool) {
+    if (chosen.length >= count) break;
+    if (isDiscovery(entry.film) && discoveryCount >= MAX_DISCOVERY) { skipped.push(entry); continue; }
+    if (isDiscovery(entry.film)) discoveryCount++;
+    chosen.push(entry);
+  }
+  while (chosen.length < count && skipped.length) chosen.push(skipped.shift());
+
+  return chosen.slice(0, count).map((entry, i) => ({
     ...entry.film,
     genreNames: entry.film.genres.map(g => GENRES[g]).filter(Boolean),
     discovery: isDiscovery(entry.film),
