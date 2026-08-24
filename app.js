@@ -92,10 +92,6 @@ function buildRows(qKey) {
 
 function show(id) {
   document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-on", s.id === id));
-
-  /* TMDB's terms require crediting them where their data is used. That's the
-     results screen — the landing page shows no film data, so it stays clean. */
-  $(".foot").hidden = id !== "s-results";
   window.scrollTo({ top: 0 });
   const steps = ["s-mood", "s-companion", "s-age", "s-time"];
   const step = steps.indexOf(id);

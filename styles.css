@@ -245,12 +245,6 @@ html, body {
 
 img.art { object-fit: cover; display: block; }
 
-.foot {
-  margin-top: 28px; padding-top: 16px;
-  border-top: 1px solid var(--line);
-  font-size: 12px; line-height: 1.5; color: var(--muted);
-}
-.foot a { color: var(--muted); }
 
 @media (prefers-reduced-motion: reduce) {
   .screen.is-on { animation: none; }
