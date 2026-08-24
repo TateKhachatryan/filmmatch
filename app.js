@@ -170,20 +170,14 @@ function render() {
 
   const top = picks[0];
   $("#hero").innerHTML =
-    '<div class="hero">' +
+    '<a class="hero" href="' + watchLink(top) + '" target="_blank" rel="noopener">' +
       '<div class="hero-top">' +
         artHTML(top, ART[0], "art") +
         "<div><h2>" + top.title.toUpperCase() + '</h2><div class="meta">' + metaLine(top) +
         '</div><div class="desc">' + top.overview + "</div></div>" +
       "</div>" +
       '<div class="why"><b>Why this one:</b> ' + top.why + "</div>" +
-      '<div class="hero-actions">' +
-        '<a href="' + watchLink(top) + '" target="_blank" rel="noopener">Where to watch</a>' +
-        '<button class="icobtn" id="share" aria-label="Share this pick">' +
-          '<svg viewBox="0 0 24 24" class="ico"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7"/><path d="M12 3v12M8 7l4-4 4 4"/></svg>' +
-        "</button>" +
-      "</div>" +
-    "</div>";
+    "</a>";
 
   $("#rest").innerHTML = picks.slice(1).map((f, i) =>
     '<a class="card" href="' + watchLink(f) + '" target="_blank" rel="noopener">' +
@@ -200,19 +194,6 @@ function render() {
   fb.classList.remove("done");
   fb.querySelector("span").textContent = "Did these fit?";
 
-  const share = $("#share");
-  if (share) share.addEventListener("click", () => shareTop(top));
-}
-
-function shareTop(film) {
-  const text = "FilmMatch says: " + film.title + " (" + film.year + "). " + film.why;
-  if (navigator.share) {
-    navigator.share({ title: "FilmMatch", text: text, url: location.href }).catch(() => {});
-  } else if (navigator.clipboard) {
-    navigator.clipboard.writeText(text + " " + location.href);
-    const fb = $("#feedback");
-    fb.querySelector("span").textContent = "Copied — send it to whoever you're watching with.";
-  }
 }
 
 /* Feedback is logged locally for now. Point this at your endpoint when you have one. */
