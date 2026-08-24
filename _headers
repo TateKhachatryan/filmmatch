@@ -3,7 +3,7 @@
   Referrer-Policy: strict-origin-when-cross-origin
 
 /data/films.js
-  Cache-Control: public, max-age=3600
+  Cache-Control: public, max-age=0, must-revalidate
 
 /styles.css
-  Cache-Control: public, max-age=3600
+  Cache-Control: public, max-age=0, must-revalidate
