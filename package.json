@@ -1,0 +1,11 @@
+{
+  "name": "filmmatch",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "catalog": "node scripts/build-catalog.mjs",
+    "test": "node scripts/test-matching.mjs",
+    "build": "node scripts/build-site.mjs",
+    "deploy": "node scripts/build-site.mjs && vercel deploy --prod --yes"
+  }
+}
