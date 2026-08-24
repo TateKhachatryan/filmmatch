@@ -216,12 +216,15 @@ function render() {
 
   $("#rest").innerHTML = picks.slice(1).map((f, i) =>
     '<a class="card" href="' + watchLink(f) + '" target="_blank" rel="noopener">' +
-      artHTML(f, ART[(i + 1) % ART.length], "art") +
-      "<div><h3>" + f.title.toUpperCase() + "</h3>" +
-      '<div class="meta">' + metaLine(f) + "</div>" +
-      '<div class="why">' + f.why + "</div>" +
-      (f.discovery ? '<span class="tag">Lesser known</span>' : "") +
+      '<div class="card-row">' +
+        artHTML(f, ART[(i + 1) % ART.length], "art") +
+        "<div><h3>" + f.title.toUpperCase() + "</h3>" +
+        '<div class="meta">' + metaLine(f) + "</div>" +
+        '<p class="desc">' + f.overview + "</p>" +
+        "</div>" +
       "</div>" +
+      '<div class="why"><span class="chip">WHY</span>' + f.why + "</div>" +
+      (f.discovery ? '<span class="tag">Lesser known</span>' : "") +
     "</a>"
   ).join("");
 
