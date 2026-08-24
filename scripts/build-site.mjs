@@ -5,7 +5,7 @@
 import { cp, mkdir, rm } from "node:fs/promises";
 
 const FILES = [
-  "index.html", "styles.css", "match.js", "app.js",
+  "index.html", "about.html", "styles.css", "match.js", "app.js",
   "config.js", "auth.js", "vendor/supabase.js",
   "favicon.svg", "manifest.json", "_headers",
   "data/films.js"

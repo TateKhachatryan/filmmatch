@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="How FilmMatch works: four questions, four films, and the thinking behind it.">
+<meta name="theme-color" content="#fff8ea">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<title>FilmMatch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&display=swap">
+<style>
+  /* Deliberately single-theme: this page documents FilmMatch, so it wears
+     FilmMatch's own palette in both light and dark hosts. Every colour is
+     painted explicitly rather than inherited. */
+  :root {
+    color-scheme: light;
+    --paper: #fff8ea;
+    --ink: #17140f;
+    --coral: #e03e1f;
+    --coral-deep: #b52f14;
+    --blue: #1f5fd0;
+    --muted: #6b6357;
+    --line: #e0d8c6;
+    --tint: #ffd9cd;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased; line-height: 1.6;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 56px 24px 80px; }
+
+  h1 {
+    font-family: "Archivo Black", sans-serif; font-weight: 400;
+    font-size: clamp(38px, 9vw, 64px); line-height: 0.95; letter-spacing: -0.035em;
+    margin: 0 0 16px; text-wrap: balance;
+  }
+  h2 {
+    font-family: "Archivo Black", sans-serif; font-weight: 400;
+    font-size: clamp(22px, 4vw, 28px); letter-spacing: -0.025em; line-height: 1.1;
+    margin: 56px 0 14px; text-wrap: balance;
+  }
+  h3 {
+    font-family: "Archivo Black", sans-serif; font-weight: 400;
+    font-size: 16px; letter-spacing: -0.02em; margin: 28px 0 6px;
+  }
+  p { margin: 0 0 14px; max-width: 68ch; }
+  .lede { font-size: 19px; line-height: 1.5; color: var(--muted); max-width: 46ch; margin-bottom: 26px; }
+  a { color: var(--coral-deep); }
+  strong { font-weight: 700; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.88em; background: var(--tint); color: var(--coral-deep);
+    padding: 1px 5px; border-radius: 4px;
+  }
+
+  .links { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 12px; }
+  .links a {
+    display: inline-flex; align-items: center; gap: 8px;
+    min-height: 46px; padding: 0 20px; border-radius: 23px;
+    text-decoration: none; font-weight: 700; font-size: 15px;
+  }
+  .links a.solid { background: var(--coral); color: var(--paper); }
+  .links a.hollow { border: 2px solid var(--ink); color: var(--ink); }
+
+  .facts { display: flex; flex-wrap: wrap; gap: 10px; margin: 26px 0 0; padding: 0; list-style: none; }
+  .facts li {
+    border: 2px solid var(--ink); border-radius: 14px; padding: 10px 14px;
+    font-size: 13px; font-weight: 500;
+  }
+  .facts b { font-family: "Archivo Black", sans-serif; font-weight: 400; font-size: 15px; display: block; }
+
+  figure { margin: 26px 0 8px; }
+  figure svg { width: 100%; height: auto; display: block; }
+  figcaption { font-size: 13.5px; color: var(--muted); margin-top: 12px; max-width: 66ch; }
+
+  .scroller { overflow-x: auto; }
+  .scroller svg { min-width: 640px; }
+
+  .rule { border: none; border-top: 2px solid var(--ink); margin: 56px 0 0; }
+
+  .callout {
+    border-left: none; border: 2px solid var(--ink); border-radius: 16px;
+    padding: 18px 20px; margin: 22px 0; background: none;
+  }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout .tag {
+    display: inline-block; background: var(--coral); color: var(--paper);
+    border-radius: 8px; padding: 3px 9px; font-size: 10px; font-weight: 700;
+    letter-spacing: 0.08em; margin-bottom: 8px;
+  }
+
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; margin: 16px 0 20px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-weight: 700; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  td:first-child { font-weight: 700; white-space: nowrap; }
+
+  ul.plain { padding-left: 20px; max-width: 68ch; }
+  ul.plain li { margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>FILMMATCH</h1>
+  <p class="lede">Four questions. Four films. One good evening — instead of forty minutes of picking.</p>
+
+  <div class="links">
+    <a class="solid" href="https://filmmatch-flax.vercel.app">Try it →</a>
+    <a class="hollow" href="https://github.com/TateKhachatryan/filmmatch">View GitHub repo</a>
+  </div>
+
+  <ul class="facts">
+    <li><b>600</b>films</li>
+    <li><b>4</b>questions</li>
+    <li><b>4</b>results, never a list</li>
+  </ul>
+
+  <hr class="rule">
+
+  <h2>The problem</h2>
+  <p>We have more films to choose from than ever, and we still spend twenty minutes choosing. Knowing you want "a thriller" doesn't help much — what you actually want is something that fits <em>tonight</em>: your mood, who's on the sofa, and how long you've got.</p>
+  <p>Long recommendation lists make this worse. Forty suggestions is the same problem in a new shape.</p>
+
+  <h2>What FilmMatch does</h2>
+  <p>It asks four questions — your mood, who you're watching with, your age, and how much time you have. Then it gives you four films. Not forty.</p>
+  <p>Each one comes with a poster, a short description with no spoilers, and one sentence saying why it picked <em>that</em> film for <em>your</em> answers. Tap it and you go straight to where you can watch it.</p>
+  <p>You can use all of it without an account. Signing in adds one thing: mark a film <strong>Seen</strong> or <strong>Not for me</strong> and it stops coming back.</p>
+
+  <h2>How it's put together</h2>
+
+  <figure class="scroller">
+    <svg viewBox="0 0 880 560" role="img" aria-label="FilmMatch architecture in three bands: a monthly build-time pipeline that fetches films from TMDB into a static file, a runtime where the browser does all matching with no backend and reports quiz paths to Vercel Analytics, and an optional signed-in path through Google and Supabase to a Postgres table of hidden films.">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polygon points="0,0 10,5 0,10" fill="#17140f"/>
+        </marker>
+        <marker id="ar-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polygon points="0,0 10,5 0,10" fill="#e03e1f"/>
+        </marker>
+      </defs>
+
+      <!-- BAND 1 : build time -->
+      <rect x="8" y="8" width="864" height="150" rx="16" fill="none" stroke="#e0d8c6" stroke-width="2"/>
+      <text x="26" y="34" font-family="Archivo Black, sans-serif" font-size="11" fill="#6b6357" letter-spacing="1.4">BUILD TIME — ONCE A MONTH</text>
+
+      <rect x="26" y="52" width="150" height="80" rx="12" fill="none" stroke="#17140f" stroke-width="2"/>
+      <text x="101" y="84" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="13" fill="#17140f">GitHub</text>
+      <text x="101" y="102" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="13" fill="#17140f">Actions</text>
+      <text x="101" y="120" text-anchor="middle" font-size="11" fill="#6b6357">cron, 1st of month</text>
+
+      <rect x="246" y="52" width="150" height="80" rx="12" fill="none" stroke="#17140f" stroke-width="2"/>
+      <text x="321" y="90" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="13" fill="#17140f">TMDB API</text>
+      <text x="321" y="110" text-anchor="middle" font-size="11" fill="#6b6357">two passes</text>
+
+      <rect x="466" y="52" width="160" height="80" rx="12" fill="#ffd9cd" stroke="#e03e1f" stroke-width="2"/>
+      <text x="546" y="84" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="13" fill="#b52f14">films.js</text>
+      <text x="546" y="103" text-anchor="middle" font-size="11" fill="#b52f14">600 films, 209 KB</text>
+      <text x="546" y="120" text-anchor="middle" font-size="11" fill="#b52f14">committed to git</text>
+
+      <rect x="696" y="52" width="150" height="80" rx="12" fill="none" stroke="#17140f" stroke-width="2"/>
+      <text x="771" y="90" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="13" fill="#17140f">Vercel</text>
+      <text x="771" y="110" text-anchor="middle" font-size="11" fill="#6b6357">deploys on push</text>
+
+      <line x1="176" y1="92" x2="240" y2="92" stroke="#17140f" stroke-width="2" marker-end="url(#ar)"/>
+      <text x="208" y="84" text-anchor="middle" font-size="10" fill="#6b6357">fetch</text>
+      <line x1="396" y1="92" x2="460" y2="92" stroke="#17140f" stroke-width="2" marker-end="url(#ar)"/>
+      <text x="428" y="84" text-anchor="middle" font-size="10" fill="#6b6357">writes</text>
+      <line x1="626" y1="92" x2="690" y2="92" stroke="#17140f" stroke-width="2" marker-end="url(#ar)"/>
+      <text x="658" y="84" text-anchor="middle" font-size="10" fill="#6b6357">commit</text>
+
+      <text x="321" y="148" text-anchor="middle" font-size="10.5" fill="#b52f14">180 answer combinations tested before any commit</text>
+
+      <!-- BAND 2 : runtime -->
+      <rect x="8" y="176" width="864" height="196" rx="16" fill="none" stroke="#e0d8c6" stroke-width="2"/>
+      <text x="26" y="202" font-family="Archivo Black, sans-serif" font-size="11" fill="#6b6357" letter-spacing="1.4">RUNTIME — EVERY VISIT</text>
+
+      <rect x="26" y="220" width="140" height="80" rx="12" fill="none" stroke="#17140f" stroke-width="2"/>
+      <text x="96" y="252" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="13" fill="#17140f">Vercel CDN</text>
+      <text x="96" y="272" text-anchor="middle" font-size="11" fill="#6b6357">static files</text>
+
+      <rect x="246" y="212" width="380" height="140" rx="14" fill="#ffd9cd" stroke="#e03e1f" stroke-width="2.5"/>
+      <text x="436" y="240" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="14" fill="#b52f14">THE BROWSER</text>
+      <text x="436" y="258" text-anchor="middle" font-size="11" fill="#b52f14">everything below runs on the device</text>
+
+      <rect x="266" y="272" width="110" height="58" rx="9" fill="#fff8ea" stroke="#b52f14" stroke-width="1.5"/>
+      <text x="321" y="296" text-anchor="middle" font-size="11.5" font-weight="700" fill="#b52f14">films.js</text>
+      <text x="321" y="314" text-anchor="middle" font-size="10" fill="#b52f14">the catalogue</text>
+
+      <rect x="386" y="272" width="110" height="58" rx="9" fill="#fff8ea" stroke="#b52f14" stroke-width="1.5"/>
+      <text x="441" y="296" text-anchor="middle" font-size="11.5" font-weight="700" fill="#b52f14">match.js</text>
+      <text x="441" y="314" text-anchor="middle" font-size="10" fill="#b52f14">scoring engine</text>
+
+      <rect x="506" y="272" width="110" height="58" rx="9" fill="#fff8ea" stroke="#b52f14" stroke-width="1.5"/>
+      <text x="561" y="296" text-anchor="middle" font-size="11.5" font-weight="700" fill="#b52f14">app.js</text>
+      <text x="561" y="314" text-anchor="middle" font-size="10" fill="#b52f14">quiz and cards</text>
+
+      <rect x="706" y="220" width="140" height="80" rx="12" fill="none" stroke="#17140f" stroke-width="2"/>
+      <text x="776" y="252" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="13" fill="#17140f">JustWatch</text>
+      <text x="776" y="272" text-anchor="middle" font-size="11" fill="#6b6357">where to watch</text>
+
+      <rect x="26" y="312" width="140" height="48" rx="10" fill="none" stroke="#17140f" stroke-width="2"/>
+      <text x="96" y="332" text-anchor="middle" font-size="11.5" font-weight="700" fill="#17140f">Vercel Analytics</text>
+      <text x="96" y="349" text-anchor="middle" font-size="10" fill="#6b6357">page views + quiz paths</text>
+      <line x1="240" y1="336" x2="172" y2="336" stroke="#17140f" stroke-width="2" marker-end="url(#ar)"/>
+
+      <line x1="166" y1="260" x2="240" y2="260" stroke="#17140f" stroke-width="2" marker-end="url(#ar)"/>
+      <text x="203" y="252" text-anchor="middle" font-size="10" fill="#6b6357">HTML, JS</text>
+      <line x1="626" y1="260" x2="700" y2="260" stroke="#17140f" stroke-width="2" marker-end="url(#ar)"/>
+      <text x="663" y="252" text-anchor="middle" font-size="10" fill="#6b6357">on tap</text>
+
+      <!-- BAND 3 : signed in -->
+      <rect x="8" y="390" width="864" height="160" rx="16" fill="none" stroke="#e0d8c6" stroke-width="2"/>
+      <text x="26" y="416" font-family="Archivo Black, sans-serif" font-size="11" fill="#6b6357" letter-spacing="1.4">OPTIONAL — ONLY IF SIGNED IN</text>
+
+      <rect x="246" y="434" width="180" height="90" rx="12" fill="none" stroke="#17140f" stroke-width="2"/>
+      <text x="336" y="464" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="13" fill="#17140f">Supabase Auth</text>
+      <text x="336" y="484" text-anchor="middle" font-size="11" fill="#6b6357">issues the session</text>
+      <text x="336" y="502" text-anchor="middle" font-size="11" fill="#6b6357">JWT in the browser</text>
+
+      <rect x="26" y="434" width="150" height="90" rx="12" fill="none" stroke="#17140f" stroke-width="2"/>
+      <text x="101" y="472" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="13" fill="#17140f">Google</text>
+      <text x="101" y="492" text-anchor="middle" font-size="11" fill="#6b6357">OAuth consent</text>
+
+      <rect x="506" y="434" width="230" height="90" rx="12" fill="none" stroke="#1f5fd0" stroke-width="2"/>
+      <text x="621" y="462" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="13" fill="#1f5fd0">Postgres · seen_films</text>
+      <text x="621" y="482" text-anchor="middle" font-size="11" fill="#1f5fd0">film_id, kind, user_id</text>
+      <text x="621" y="502" text-anchor="middle" font-size="11" fill="#1f5fd0">row-level security</text>
+
+      <line x1="246" y1="479" x2="182" y2="479" stroke="#17140f" stroke-width="2" marker-end="url(#ar)"/>
+      <line x1="426" y1="479" x2="500" y2="479" stroke="#17140f" stroke-width="2" marker-end="url(#ar)"/>
+      <text x="463" y="471" text-anchor="middle" font-size="10" fill="#6b6357">JWT</text>
+
+      <path d="M 436 352 L 436 400 L 340 400 L 340 430" fill="none" stroke="#e03e1f" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ar-c)"/>
+      <path d="M 560 352 L 560 410 L 600 410 L 600 430" fill="none" stroke="#e03e1f" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ar-c)"/>
+      <text x="700" y="404" text-anchor="middle" font-size="10.5" fill="#b52f14">reads and writes hidden films directly</text>
+    </svg>
+    <figcaption><strong>Three things happening at three different speeds.</strong> Once a month, a robot fetches fresh film data and saves it into the app itself. When you visit, everything happens on your phone — there's no server doing the thinking, which is why it's instant and costs nothing to run. Only signing in touches a database, and that database is what keeps your list private.</figcaption>
+  </figure>
+
+  <h2>How it picks the films</h2>
+
+  <figure class="scroller">
+    <svg viewBox="0 0 880 330" role="img" aria-label="The matching pipeline: 600 films pass through hard safety filters, then weighted scoring, then a discovery cap, producing one top match and three shuffled alternatives, each with a generated reason.">
+      <defs>
+        <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polygon points="0,0 10,5 0,10" fill="#17140f"/>
+        </marker>
+      </defs>
+
+      <rect x="10" y="60" width="128" height="86" rx="12" fill="none" stroke="#17140f" stroke-width="2"/>
+      <text x="74" y="96" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="17" fill="#17140f">600</text>
+      <text x="74" y="116" text-anchor="middle" font-size="11" fill="#6b6357">films in the</text>
+      <text x="74" y="132" text-anchor="middle" font-size="11" fill="#6b6357">catalogue</text>
+
+      <rect x="180" y="46" width="160" height="114" rx="12" fill="none" stroke="#e03e1f" stroke-width="2.5"/>
+      <text x="260" y="72" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="12" fill="#b52f14">HARD FILTERS</text>
+      <text x="260" y="94" text-anchor="middle" font-size="11" fill="#17140f">age certificate</text>
+      <text x="260" y="112" text-anchor="middle" font-size="11" fill="#17140f">no horror for kids</text>
+      <text x="260" y="130" text-anchor="middle" font-size="11" fill="#17140f">runtime budget</text>
+      <text x="260" y="150" text-anchor="middle" font-size="10" fill="#b52f14">never scored — excluded</text>
+
+      <rect x="382" y="46" width="170" height="114" rx="12" fill="none" stroke="#17140f" stroke-width="2"/>
+      <text x="467" y="72" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="12" fill="#17140f">WEIGHTED SCORE</text>
+      <text x="467" y="94" text-anchor="middle" font-size="11" fill="#17140f">mood × 3</text>
+      <text x="467" y="112" text-anchor="middle" font-size="11" fill="#17140f">+ company + runtime</text>
+      <text x="467" y="130" text-anchor="middle" font-size="11" fill="#17140f">+ rating + discovery</text>
+      <text x="467" y="150" text-anchor="middle" font-size="10" fill="#6b6357">primary genre weighted 1.6×</text>
+
+      <rect x="594" y="46" width="150" height="114" rx="12" fill="none" stroke="#17140f" stroke-width="2"/>
+      <text x="669" y="72" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="12" fill="#17140f">SELECTION</text>
+      <text x="669" y="96" text-anchor="middle" font-size="11" fill="#17140f">rank 1 → hero</text>
+      <text x="669" y="116" text-anchor="middle" font-size="11" fill="#17140f">next 12 shuffled</text>
+      <text x="669" y="136" text-anchor="middle" font-size="11" fill="#17140f">max 2 under-seen</text>
+
+      <rect x="786" y="60" width="84" height="86" rx="12" fill="#ffd9cd" stroke="#e03e1f" stroke-width="2"/>
+      <text x="828" y="96" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="17" fill="#b52f14">4</text>
+      <text x="828" y="116" text-anchor="middle" font-size="11" fill="#b52f14">films</text>
+      <text x="828" y="132" text-anchor="middle" font-size="11" fill="#b52f14">+ reasons</text>
+
+      <line x1="138" y1="103" x2="174" y2="103" stroke="#17140f" stroke-width="2" marker-end="url(#ar2)"/>
+      <line x1="340" y1="103" x2="376" y2="103" stroke="#17140f" stroke-width="2" marker-end="url(#ar2)"/>
+      <line x1="552" y1="103" x2="588" y2="103" stroke="#17140f" stroke-width="2" marker-end="url(#ar2)"/>
+      <line x1="744" y1="103" x2="780" y2="103" stroke="#17140f" stroke-width="2" marker-end="url(#ar2)"/>
+
+      <rect x="180" y="212" width="564" height="86" rx="12" fill="none" stroke="#17140f" stroke-width="2" stroke-dasharray="6 4"/>
+      <text x="462" y="238" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="12" fill="#17140f">THE REASON IS ASSEMBLED FROM THE SIGNALS THAT ACTUALLY SCORED</text>
+      <text x="462" y="262" text-anchor="middle" font-size="12" fill="#6b6357">"It's horror, no apologies and 96 minutes fits the evening you've got."</text>
+      <text x="462" y="284" text-anchor="middle" font-size="10.5" fill="#b52f14">phrased from the mood, never from a genre the film merely carries — so it cannot claim something untrue</text>
+
+      <line x1="467" y1="160" x2="467" y2="206" stroke="#17140f" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#ar2)"/>
+    </svg>
+    <figcaption><strong>Two different jobs.</strong> First it removes anything unsuitable — too long for your evening, or wrong for your age. Those are removed completely, not just ranked lower, because getting that wrong loses trust. Then it scores what's left on how well it fits, and the sentence you read is built from the same reasons that won. That's why it can't tell you a film is funny when it isn't.</figcaption>
+  </figure>
+
+  <h2>Three decisions I'd defend</h2>
+
+  <h3>Four films, not a list</h3>
+  <p>The first result is deliberately the biggest thing on the screen, so the app actually answers the question instead of handing the decision back. If the top pick is wrong that's a louder mistake — but the whole promise was fewer choices.</p>
+
+  <h3>It explains itself, honestly</h3>
+  <p>Every "why this one" line is built from the real reasons the film was chosen, so it can never overclaim. Films the app can't justify don't get a reason invented for them.</p>
+
+  <h3>Half the films are ones you haven't heard of</h3>
+  <p>Otherwise you get the same famous titles every time. But never more than two out of four — four unknown films feels like the app is dodging the question rather than curating.</p>
+
+  <h2>What I set up</h2>
+  <p>The whole thing runs on services I configured myself:</p>
+  <ul class="plain">
+    <li><strong>Google sign-in</strong> — set up in Google Cloud and connected to the app's login.</li>
+    <li><strong>Supabase</strong> — the database, its security rules, and the login provider.</li>
+    <li><strong>Vercel</strong> — hosting, plus analytics so I can see which moods and answers people actually pick.</li>
+    <li><strong>GitHub</strong> — the code, and a monthly job that refreshes the film data on its own.</li>
+  </ul>
+  <p>That monthly job checks its own work: it tries all 180 possible answer combinations and refuses to publish if anything looks wrong.</p>
+
+  <h2>What's next</h2>
+  <ul class="plain">
+    <li><strong>Listening to feedback properly.</strong> The thumbs up and down don't reach me yet — so every judgement about what makes a good match is still just my opinion.</li>
+    <li><strong>Real users.</strong> Nobody outside the build has tried it. That's the honest gap.</li>
+  </ul>
+
+</div>
+</body>
+</html>
