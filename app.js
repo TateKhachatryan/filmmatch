@@ -175,7 +175,12 @@ function watchLink(film) {
 }
 
 function metaLine(film) {
-  return film.year + " · " + film.genreNames[0] + " · " + film.runtime + " min";
+  return [
+    film.year,
+    film.genreNames[0],
+    film.runtime + " min",
+    window.FilmMatch.certLabel(film)
+  ].join(" · ");
 }
 
 /* "Already seen" — only for signed-in viewers. The card is a link, so the
