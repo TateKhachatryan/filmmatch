@@ -328,7 +328,14 @@ img.art { object-fit: cover; display: block; }
 .hide-btn:active { transform: scale(0.96); }
 .hide-btn:disabled { opacity: 0.5; }
 /* On the coral hero a paper-filled button would glare, so invert it. */
-.hero .hide-btn { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+/* On the coral hero these are secondary to the film itself, so they get a
+   hairline in the paper colour rather than the solid fill the cards use. */
+.hero .hide-btn {
+  background: none;
+  color: var(--paper);
+  border: 1.5px solid rgba(255, 248, 234, 0.55);
+}
+.hero .hide-btn:active { background: rgba(255, 248, 234, 0.12); }
 
 .seen-row {
   display: flex; align-items: center; gap: 14px;
