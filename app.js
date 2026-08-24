@@ -88,6 +88,39 @@ function buildRows(qKey) {
   });
 }
 
+/* Analytics without custom events.
+   Vercel's script wraps history.pushState, so every pushed path is recorded as
+   a page view — and custom events are a Pro feature. Pushing a meaningful path
+   turns the Pages panel into an answer breakdown at no cost. replaceState is
+   NOT wrapped, so we use it to restore the address bar silently. */
+function answersPath(a) {
+  return "/r/" + [a.mood, a.companion, a.age, a.time].join("-");
+}
+
+function trackPath(path) {
+  history.pushState({}, "", path);
+}
+
+/* Record a one-off action, then put the address bar back where it was. */
+function trackAction(path) {
+  const here = location.pathname;
+  history.pushState({}, "", path);
+  history.replaceState({}, "", here);
+}
+
+/* A results URL is shareable: parse it back into answers, or return null. */
+function answersFromPath() {
+  const m = location.pathname.match(/^\/r\/([a-z]+)-([a-z]+)-([a-z]+)-([a-z]+)/);
+  if (!m) return null;
+  const [, mood, companion, age, time] = m;
+  const valid =
+    QUESTIONS.mood.options.some(o => o.key === mood) &&
+    QUESTIONS.companion.options.some(o => o.key === companion) &&
+    QUESTIONS.age.options.some(o => o.key === age) &&
+    QUESTIONS.time.options.some(o => o.key === time);
+  return valid ? { mood, companion, age, time } : null;
+}
+
 /* --- flow --- */
 
 function show(id) {
@@ -112,6 +145,7 @@ function answer(qKey, value) {
   if (next === "s-results") {
     state.seen = [];
     render();
+    trackPath(answersPath(state.answers));
   }
   show(next);
 }
@@ -119,6 +153,7 @@ function answer(qKey, value) {
 function reset() {
   state.answers = {};
   state.seen = [];
+  trackPath("/");
 }
 
 /* --- results --- */
@@ -220,15 +255,28 @@ document.querySelectorAll("[data-back]").forEach(b =>
     show(b.dataset.back);
   }));
 
-$("#more").addEventListener("click", render);
+$("#more").addEventListener("click", () => {
+  render();
+  trackAction(answersPath(state.answers) + "/more");
+});
 
 document.querySelectorAll("[data-vote]").forEach(b =>
   b.addEventListener("click", () => {
     logVote(b.dataset.vote);
+    trackAction("/vote/" + b.dataset.vote);
     const fb = $("#feedback");
     fb.classList.add("done");
     fb.querySelector("span").textContent =
       b.dataset.vote === "up" ? "Good — noted." : "Noted. Try four more.";
   }));
 
-show("s-intro");
+/* A shared /r/... link lands straight on its results. */
+const shared = answersFromPath();
+if (shared) {
+  state.answers = shared;
+  state.seen = [];
+  render();
+  show("s-results");
+} else {
+  show("s-intro");
+}

@@ -33,5 +33,15 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/r/(.*)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/vote/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }
