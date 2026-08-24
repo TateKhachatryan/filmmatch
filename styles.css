@@ -266,3 +266,62 @@ img.art { object-fit: cover; display: block; }
   .screen.is-on { animation: none; }
   * { transition: none !important; }
 }
+
+/* --- account, seen control, profile ------------------------------------ */
+
+.account { margin-left: auto; }
+
+.acct-btn {
+  appearance: none; cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  min-height: 36px; padding: 4px 12px 4px 6px;
+  border: 2px solid var(--ink); border-radius: 18px;
+  background: none; color: var(--ink);
+  font-family: "Space Grotesk", sans-serif; font-size: 13px; font-weight: 500;
+}
+.acct-btn:active { transform: scale(0.97); }
+.avatar { width: 26px; height: 26px; border-radius: 13px; display: block; object-fit: cover; }
+.avatar-fallback {
+  background: var(--ink); color: var(--paper);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+}
+
+/* The card is one big link, so its secondary control sits above it rather
+   than inside it. */
+.card-wrap { position: relative; }
+.card-wrap.is-seen { opacity: 0; transform: scale(0.97); transition: opacity 240ms ease, transform 240ms ease; }
+
+.seen-btn {
+  position: absolute; top: 10px; right: 10px; z-index: 2;
+  appearance: none; cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  min-height: 32px; padding: 0 11px;
+  border-radius: 16px; border: 2px solid var(--ink);
+  background: var(--paper); color: var(--ink);
+  font-family: "Space Grotesk", sans-serif; font-size: 12px; font-weight: 700;
+}
+.seen-btn .ico { width: 13px; height: 13px; }
+.seen-btn:active { transform: scale(0.96); }
+.seen-btn:disabled { opacity: 0.5; }
+/* On the coral hero the outline would disappear, so invert it. */
+.card-wrap:has(.hero) .seen-btn { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+.seen-row {
+  display: flex; align-items: center; gap: 14px;
+  border: 2px solid var(--ink); border-radius: 20px; padding: 12px;
+}
+.seen-row .art { width: 46px; height: 66px; border-radius: 6px; flex: none; background: var(--line); object-fit: cover; }
+.seen-row h3 { font-family: "Archivo Black", sans-serif; font-weight: 400; font-size: 15px; letter-spacing: -0.02em; margin: 0 0 3px; }
+.seen-row .meta { font-size: 12px; color: var(--muted); font-weight: 500; }
+.seen-row > div { flex-grow: 1; min-width: 0; }
+
+.unmark {
+  appearance: none; cursor: pointer; flex: none;
+  min-height: 40px; padding: 0 14px;
+  border-radius: 20px; border: 2px solid var(--line);
+  background: none; color: var(--muted);
+  font-family: "Space Grotesk", sans-serif; font-size: 13px; font-weight: 500;
+}
+.unmark:active { transform: scale(0.97); }
+.unmark:disabled { opacity: 0.5; }

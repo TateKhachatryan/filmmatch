@@ -42,6 +42,10 @@
     {
       "source": "/vote/(.*)",
       "destination": "/index.html"
+    },
+    {
+      "source": "/profile",
+      "destination": "/index.html"
     }
   ]
 }

@@ -20,6 +20,7 @@
   <header class="bar">
     <div class="wordmark">FILMMATCH</div>
     <div class="dots" id="dots" aria-hidden="true"></div>
+    <div class="account" id="account" hidden></div>
   </header>
 
   <!-- Intro -->
@@ -108,6 +109,18 @@
     </div>
   </section>
 
+  <!-- Profile: films marked as already seen -->
+  <section class="screen" id="s-profile">
+    <h1 class="display">ALREADY<br>SEEN</h1>
+    <p class="lede" id="seen-intro"></p>
+    <div class="stack" id="seen-list"></div>
+    <div class="grow"></div>
+    <div class="actions">
+      <button class="btn outline" data-back="s-intro">Back to FilmMatch</button>
+      <button class="btn ghost" id="signout">Sign out</button>
+    </div>
+  </section>
+
 </main>
 
 <!-- Vercel Web Analytics. Served by Vercel itself at this path, so there is no
@@ -115,6 +128,9 @@
      records page views and referrers, not individuals. -->
 <script defer src="/_vercel/insights/script.js"></script>
 
+<script src="/vendor/supabase.js"></script>
+<script src="/config.js"></script>
+<script src="/auth.js"></script>
 <script src="/data/films.js"></script>
 <script src="/match.js"></script>
 <script src="/app.js"></script>

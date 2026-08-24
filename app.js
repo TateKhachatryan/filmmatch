@@ -178,9 +178,39 @@ function metaLine(film) {
   return film.year + " · " + film.genreNames[0] + " · " + film.runtime + " min";
 }
 
+/* "Already seen" — only for signed-in viewers. The card is a link, so the
+   control sits beside it in a wrapper rather than inside it: a button nested
+   in an anchor is invalid and unreachable by keyboard. */
+function seenButton(film) {
+  if (!FM.auth.isSignedIn()) return "";
+  return '<button class="seen-btn" data-seen="' + film.id + '" ' +
+    'aria-label="Mark ' + film.title.replace(/"/g, "&quot;") + ' as already seen">' +
+    '<svg viewBox="0 0 24 24" class="ico"><path d="M5 13l4 4L19 7"/></svg>Seen</button>';
+}
+
+function wireSeenButtons(picks) {
+  document.querySelectorAll("[data-seen]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const film = picks.find(f => String(f.id) === btn.dataset.seen);
+      if (!film) return;
+      btn.disabled = true;
+      const ok = await FM.auth.markSeen(film);
+      if (!ok) { btn.disabled = false; return; }
+      /* Drop it from view immediately — it will not come back in future sets. */
+      const wrap = btn.closest(".card-wrap");
+      wrap.classList.add("is-seen");
+      setTimeout(() => wrap.remove(), 260);
+    });
+  });
+}
+
 function render() {
   const a = state.answers;
-  const picks = window.FilmMatch.match(window.FILMS, a, { count: 4, exclude: state.seen });
+  const picks = window.FilmMatch.match(window.FILMS, a, {
+    count: 4,
+    exclude: state.seen,
+    excludeIds: FM.auth.isSignedIn() ? FM.auth.seenIds() : new Set()
+  });
   state.shown = picks;
   state.seen = state.seen.concat(picks.map(p => p.title));
 
@@ -205,6 +235,8 @@ function render() {
 
   const top = picks[0];
   $("#hero").innerHTML =
+    '<div class="card-wrap">' +
+    seenButton(top) +
     '<a class="hero" href="' + watchLink(top) + '" target="_blank" rel="noopener">' +
       '<div class="hero-top">' +
         artHTML(top, ART[0], "art") +
@@ -212,9 +244,11 @@ function render() {
         '</div><div class="desc">' + top.overview + "</div></div>" +
       "</div>" +
       '<div class="why"><b>Why this one:</b> ' + top.why + "</div>" +
-    "</a>";
+    "</a></div>";
 
   $("#rest").innerHTML = picks.slice(1).map((f, i) =>
+    '<div class="card-wrap">' +
+    seenButton(f) +
     '<a class="card" href="' + watchLink(f) + '" target="_blank" rel="noopener">' +
       '<div class="card-row">' +
         artHTML(f, ART[(i + 1) % ART.length], "art") +
@@ -225,8 +259,10 @@ function render() {
       "</div>" +
       '<div class="why"><span class="chip">WHY</span>' + f.why + "</div>" +
       (f.discovery ? '<span class="tag">Lesser known</span>' : "") +
-    "</a>"
+    "</a></div>"
   ).join("");
+
+  wireSeenButtons(picks);
 
   const fb = $("#feedback");
   fb.classList.remove("done");
@@ -240,6 +276,58 @@ function logVote(vote) {
   const all = JSON.parse(localStorage.getItem("fm-votes") || "[]");
   all.push(entry);
   localStorage.setItem("fm-votes", JSON.stringify(all));
+}
+
+/* --- account and profile ------------------------------------------------ */
+
+function renderAccount(googleOn) {
+  const el = $("#account");
+  if (!FM.auth.configured || !googleOn) { el.hidden = true; return; }
+  el.hidden = false;
+
+  if (!FM.auth.isSignedIn()) {
+    el.innerHTML = '<button class="acct-btn" id="signin">Sign in</button>';
+    $("#signin").addEventListener("click", () => FM.auth.signIn());
+    return;
+  }
+
+  const avatar = FM.auth.avatar();
+  el.innerHTML =
+    '<button class="acct-btn" id="profile-open" aria-label="Your already-seen films">' +
+      (avatar ? '<img src="' + avatar + '" alt="" class="avatar">'
+              : '<span class="avatar avatar-fallback">' + FM.auth.name().charAt(0).toUpperCase() + "</span>") +
+      "<span>" + FM.auth.seenList().length + " seen</span>" +
+    "</button>";
+  $("#profile-open").addEventListener("click", () => {
+    renderProfile();
+    show("s-profile");
+    trackPath("/profile");
+  });
+}
+
+function renderProfile() {
+  const films = FM.auth.seenList();
+  $("#seen-intro").textContent = films.length
+    ? "These are hidden from your recommendations. Unmark one to let it come back."
+    : "Nothing marked yet. Mark a film as seen on your results and it stops being suggested.";
+
+  $("#seen-list").innerHTML = films.map(row =>
+    '<div class="seen-row">' +
+      (row.poster
+        ? '<img class="art" alt="" loading="lazy" src="https://image.tmdb.org/t/p/w185' + row.poster + '">'
+        : '<div class="art"></div>') +
+      "<div><h3>" + row.title.toUpperCase() + "</h3>" +
+      '<div class="meta">' + (row.year || "") + "</div></div>" +
+      '<button class="unmark" data-unmark="' + row.film_id + '">Unmark</button>' +
+    "</div>"
+  ).join("");
+
+  document.querySelectorAll("[data-unmark]").forEach(btn =>
+    btn.addEventListener("click", async () => {
+      btn.disabled = true;
+      const ok = await FM.auth.unmarkSeen(Number(btn.dataset.unmark));
+      if (ok) renderProfile(); else btn.disabled = false;
+    }));
 }
 
 /* --- wiring --- */
@@ -257,6 +345,12 @@ document.querySelectorAll("[data-back]").forEach(b =>
     if (b.dataset.back === "s-intro") reset();
     show(b.dataset.back);
   }));
+
+$("#signout").addEventListener("click", async () => {
+  await FM.auth.signOut();
+  reset();
+  show("s-intro");
+});
 
 $("#more").addEventListener("click", () => {
   render();
@@ -282,4 +376,17 @@ if (shared) {
   show("s-results");
 } else {
   show("s-intro");
+}
+
+/* Auth is additive: the app has already rendered by the time this resolves,
+   and everything above works whether or not it ever does. */
+if (FM.auth.configured) {
+  FM.auth.googleEnabled().then(async on => {
+    FM.auth.onChange(() => {
+      renderAccount(on);
+      if (document.querySelector("#s-profile").classList.contains("is-on")) renderProfile();
+    });
+    await FM.auth.init();
+    renderAccount(on);
+  });
 }

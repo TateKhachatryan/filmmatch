@@ -189,10 +189,14 @@ function scoreFilm(film, answers) {
 function match(films, answers, opts) {
   const count = (opts && opts.count) || 4;
   const exclude = (opts && opts.exclude) || [];
+  /* Films a signed-in viewer has marked as already seen. Ids, not titles —
+     titles repeat across the catalogue. */
+  const excludeIds = (opts && opts.excludeIds) || new Set();
 
   const eligible = films
     .filter(f => allowed(f, answers))
-    .filter(f => !exclude.includes(f.title));
+    .filter(f => !exclude.includes(f.title))
+    .filter(f => !excludeIds.has(f.id));
 
   /* A film that barely registers on the chosen mood has no business here —
      but never starve the result set to enforce it. */
