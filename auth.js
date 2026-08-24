@@ -43,7 +43,7 @@ FM.auth = (function () {
     if (!user) return;
     const { data, error } = await client
       .from("seen_films")
-      .select("film_id, title, year, poster, marked_at")
+      .select("film_id, title, year, poster, marked_at, kind")
       .order("marked_at", { ascending: false });
     if (error) return;
     data.forEach(row => seen.set(row.film_id, row));
@@ -77,23 +77,34 @@ FM.auth = (function () {
     await client.auth.signOut();
   }
 
-  async function markSeen(film) {
+  /* kind is "seen" or "skipped": both hide the film, and the profile page
+     shows which is which. */
+  async function hideFilm(film, kind) {
     if (!user) return false;
     const row = {
       user_id: user.id,
       film_id: film.id,
       title: film.title,
       year: film.year || null,
-      poster: film.poster || null
+      poster: film.poster || null,
+      kind: kind === "skipped" ? "skipped" : "seen"
     };
-    const { error } = await client.from("seen_films").insert(row);
+    let { error } = await client.from("seen_films").insert(row);
+
+    /* The kind column arrives in a separate migration. If this project has not
+       run it yet, fall back to a plain row rather than failing the click —
+       every mark still hides the film, it just isn't labelled. */
+    if (error && /kind/.test(error.message || "")) {
+      const { kind, ...withoutKind } = row;
+      ({ error } = await client.from("seen_films").insert(withoutKind));
+    }
     if (error) return false;
     seen.set(film.id, { ...row, marked_at: new Date().toISOString() });
     notify();
     return true;
   }
 
-  async function unmarkSeen(filmId) {
+  async function unhideFilm(filmId) {
     if (!user) return false;
     const { error } = await client.from("seen_films").delete().eq("film_id", filmId);
     if (error) return false;
@@ -108,8 +119,8 @@ FM.auth = (function () {
     init,
     signIn,
     signOut,
-    markSeen,
-    unmarkSeen,
+    hideFilm,
+    unhideFilm,
     isSignedIn: () => Boolean(user),
     name: () => {
       if (!user) return "";

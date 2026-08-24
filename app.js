@@ -181,23 +181,32 @@ function metaLine(film) {
 /* "Already seen" — only for signed-in viewers. The card is a link, so the
    control sits beside it in a wrapper rather than inside it: a button nested
    in an anchor is invalid and unreachable by keyboard. */
-function seenButton(film) {
+function hideActions(film) {
   if (!FM.auth.isSignedIn()) return "";
-  return '<button class="seen-btn" data-seen="' + film.id + '" ' +
-    'aria-label="Mark ' + film.title.replace(/"/g, "&quot;") + ' as already seen">' +
-    '<svg viewBox="0 0 24 24" class="ico"><path d="M5 13l4 4L19 7"/></svg>Seen</button>';
+  const safe = film.title.replace(/"/g, "&quot;");
+  return '<div class="hide-actions">' +
+    '<button class="hide-btn" data-hide="seen" data-film="' + film.id + '" ' +
+      'aria-label="Mark ' + safe + ' as already seen">' +
+      '<svg viewBox="0 0 24 24" class="ico"><path d="M5 13l4 4L19 7"/></svg>Seen</button>' +
+    '<button class="hide-btn" data-hide="skipped" data-film="' + film.id + '" ' +
+      'aria-label="Not interested in ' + safe + '">' +
+      '<svg viewBox="0 0 24 24" class="ico"><path d="M6 6l12 12M18 6L6 18"/></svg>Not for me</button>' +
+  "</div>";
 }
 
 function wireSeenButtons(picks) {
-  document.querySelectorAll("[data-seen]").forEach(btn => {
+  document.querySelectorAll("[data-hide]").forEach(btn => {
     btn.addEventListener("click", async () => {
-      const film = picks.find(f => String(f.id) === btn.dataset.seen);
+      const film = picks.find(f => String(f.id) === btn.dataset.film);
       if (!film) return;
-      btn.disabled = true;
-      const ok = await FM.auth.markSeen(film);
-      if (!ok) { btn.disabled = false; return; }
+      const wrap = btn.closest(".card, .hero");
+      wrap.querySelectorAll("[data-hide]").forEach(b => (b.disabled = true));
+      const ok = await FM.auth.hideFilm(film, btn.dataset.hide);
+      if (!ok) {
+        wrap.querySelectorAll("[data-hide]").forEach(b => (b.disabled = false));
+        return;
+      }
       /* Drop it from view immediately — it will not come back in future sets. */
-      const wrap = btn.closest(".card-wrap");
       wrap.classList.add("is-seen");
       setTimeout(() => wrap.remove(), 260);
     });
@@ -235,31 +244,32 @@ function render() {
 
   const top = picks[0];
   $("#hero").innerHTML =
-    '<div class="card-wrap">' +
-    seenButton(top) +
-    '<a class="hero" href="' + watchLink(top) + '" target="_blank" rel="noopener">' +
+    '<article class="hero">' +
       '<div class="hero-top">' +
         artHTML(top, ART[0], "art") +
-        "<div><h2>" + top.title.toUpperCase() + '</h2><div class="meta">' + metaLine(top) +
-        '</div><div class="desc">' + top.overview + "</div></div>" +
+        '<div><h2><a class="card-link" href="' + watchLink(top) + '" target="_blank" ' +
+          'rel="noopener">' + top.title.toUpperCase() + "</a></h2>" +
+        '<div class="meta">' + metaLine(top) + "</div>" +
+        '<div class="desc">' + top.overview + "</div></div>" +
       "</div>" +
       '<div class="why"><b>Why this one:</b> ' + top.why + "</div>" +
-    "</a></div>";
+      hideActions(top) +
+    "</article>";
 
   $("#rest").innerHTML = picks.slice(1).map((f, i) =>
-    '<div class="card-wrap">' +
-    seenButton(f) +
-    '<a class="card" href="' + watchLink(f) + '" target="_blank" rel="noopener">' +
+    '<article class="card">' +
       '<div class="card-row">' +
         artHTML(f, ART[(i + 1) % ART.length], "art") +
-        "<div><h3>" + f.title.toUpperCase() + "</h3>" +
+        '<div><h3><a class="card-link" href="' + watchLink(f) + '" target="_blank" ' +
+          'rel="noopener">' + f.title.toUpperCase() + "</a></h3>" +
         '<div class="meta">' + metaLine(f) + "</div>" +
         '<p class="desc">' + f.overview + "</p>" +
         "</div>" +
       "</div>" +
       '<div class="why"><span class="chip">WHY</span>' + f.why + "</div>" +
       (f.discovery ? '<span class="tag">Lesser known</span>' : "") +
-    "</a></div>"
+      hideActions(f) +
+    "</article>"
   ).join("");
 
   wireSeenButtons(picks);
@@ -309,7 +319,7 @@ function renderProfile() {
   const films = FM.auth.seenList();
   $("#seen-intro").textContent = films.length
     ? "These are hidden from your recommendations. Unmark one to let it come back."
-    : "Nothing marked yet. Mark a film as seen on your results and it stops being suggested.";
+    : "Nothing hidden yet. Mark a film as seen — or as not for you — and it stops being suggested.";
 
   $("#seen-list").innerHTML = films.map(row =>
     '<div class="seen-row">' +
@@ -317,7 +327,10 @@ function renderProfile() {
         ? '<img class="art" alt="" loading="lazy" src="https://image.tmdb.org/t/p/w185' + row.poster + '">'
         : '<div class="art"></div>') +
       "<div><h3>" + row.title.toUpperCase() + "</h3>" +
-      '<div class="meta">' + (row.year || "") + "</div></div>" +
+      '<div class="meta">' + (row.year || "") + "</div>" +
+      '<span class="kind kind-' + (row.kind || "seen") + '">' +
+        (row.kind === "skipped" ? "Not for me" : "Seen") + "</span>" +
+      "</div>" +
       '<button class="unmark" data-unmark="' + row.film_id + '">Unmark</button>' +
     "</div>"
   ).join("");
@@ -325,7 +338,7 @@ function renderProfile() {
   document.querySelectorAll("[data-unmark]").forEach(btn =>
     btn.addEventListener("click", async () => {
       btn.disabled = true;
-      const ok = await FM.auth.unmarkSeen(Number(btn.dataset.unmark));
+      const ok = await FM.auth.unhideFilm(Number(btn.dataset.unmark));
       if (ok) renderProfile(); else btn.disabled = false;
     }));
 }

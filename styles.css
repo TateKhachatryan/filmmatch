@@ -34,7 +34,7 @@ html, body {
 .bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 18px;
   padding: 12px 0 24px;
 }
 
@@ -173,12 +173,10 @@ html, body {
 .caveat b { font-weight: 700; }
 
 .hero {
+  position: relative;
   background: var(--coral); border-radius: 24px; padding: 18px;
   display: flex; flex-direction: column; gap: 14px;
-  text-decoration: none; cursor: pointer;
-  transition: transform 120ms ease;
 }
-.hero:active { transform: scale(0.985); }
 .hero-top { display: flex; gap: 16px; }
 .hero .art { width: 86px; height: 124px; border-radius: 12px; background: var(--coral-deep); flex: none; }
 .hero h2 {
@@ -204,24 +202,29 @@ html, body {
 
 .stack { display: flex; flex-direction: column; gap: 12px; }
 .card {
+  position: relative;
   border: 2px solid var(--ink); border-radius: 20px;
   padding: 14px; display: flex; flex-direction: column;
-  text-decoration: none; color: var(--ink); cursor: pointer;
-  transition: transform 120ms ease, background 120ms ease;
+  color: var(--ink);
+  transition: background 120ms ease;
 }
 .card-row { display: flex; gap: 14px; align-items: flex-start; }
-.card:active { transform: scale(0.985); }
+
+/* The title is the link, but its hit area covers the whole card — so the card
+   still opens where-to-watch on a tap, while the buttons below stay clickable
+   in their own right. A button inside an anchor would be invalid markup. */
+.card-link { text-decoration: none; color: inherit; }
+.card-link::after { content: ""; position: absolute; inset: 0; z-index: 0; border-radius: inherit; }
+.hero .card-link { color: var(--paper); }
 
 /* Pointer devices get a hover cue; touch devices, which have none, rely on
    the press animation instead. */
 @media (hover: hover) {
-  .card:hover { background: #fdf1de; }
-  .hero:hover { background: var(--coral-deep); }
+  .card:has(.card-link:hover) { background: #fdf1de; }
+  .hero:has(.card-link:hover) { background: var(--coral-deep); }
 }
 
-.hero:focus-visible, .card:focus-visible {
-  outline: 3px solid var(--ink); outline-offset: 3px;
-}
+.card-link:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; border-radius: 4px; }
 .card .art { width: 62px; height: 88px; border-radius: 8px; flex: none; }
 .card h3 { font-family: "Archivo Black", sans-serif; font-weight: 400; font-size: 16px; letter-spacing: -0.02em; margin: 0 0 4px; }
 .card .meta { font-size: 12px; color: var(--muted); font-weight: 500; }
@@ -303,23 +306,29 @@ img.art { object-fit: cover; display: block; }
 
 /* The card is one big link, so its secondary control sits above it rather
    than inside it. */
-.card-wrap { position: relative; }
-.card-wrap.is-seen { opacity: 0; transform: scale(0.97); transition: opacity 240ms ease, transform 240ms ease; }
+.card.is-seen, .hero.is-seen {
+  opacity: 0; transform: scale(0.97);
+  transition: opacity 240ms ease, transform 240ms ease;
+}
 
-.seen-btn {
-  position: absolute; top: 10px; right: 10px; z-index: 2;
+.hide-actions {
+  position: relative; z-index: 1;
+  display: flex; gap: 8px; margin-top: 12px;
+}
+.hide-btn {
   appearance: none; cursor: pointer;
   display: flex; align-items: center; gap: 5px;
-  min-height: 32px; padding: 0 11px;
-  border-radius: 16px; border: 2px solid var(--ink);
+  min-height: 36px; padding: 0 14px;
+  border-radius: 15px; border: 2px solid var(--ink);
   background: var(--paper); color: var(--ink);
-  font-family: "Space Grotesk", sans-serif; font-size: 12px; font-weight: 700;
+  font-family: "Space Grotesk", sans-serif; font-size: 11px; font-weight: 700;
+  white-space: nowrap;
 }
-.seen-btn .ico { width: 13px; height: 13px; }
-.seen-btn:active { transform: scale(0.96); }
-.seen-btn:disabled { opacity: 0.5; }
-/* On the coral hero the outline would disappear, so invert it. */
-.card-wrap:has(.hero) .seen-btn { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.hide-btn .ico { width: 12px; height: 12px; }
+.hide-btn:active { transform: scale(0.96); }
+.hide-btn:disabled { opacity: 0.5; }
+/* On the coral hero a paper-filled button would glare, so invert it. */
+.hero .hide-btn { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 
 .seen-row {
   display: flex; align-items: center; gap: 14px;
@@ -329,6 +338,13 @@ img.art { object-fit: cover; display: block; }
 .seen-row h3 { font-family: "Archivo Black", sans-serif; font-weight: 400; font-size: 15px; letter-spacing: -0.02em; margin: 0 0 3px; }
 .seen-row .meta { font-size: 12px; color: var(--muted); font-weight: 500; }
 .seen-row > div { flex-grow: 1; min-width: 0; }
+.kind {
+  display: inline-block; margin-top: 5px;
+  border-radius: 9px; padding: 2px 8px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+}
+.kind-seen { background: var(--tint); color: var(--coral-deep); }
+.kind-skipped { background: var(--line); color: var(--muted); }
 
 .unmark {
   appearance: none; cursor: pointer; flex: none;
