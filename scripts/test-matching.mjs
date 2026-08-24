@@ -30,10 +30,13 @@ const fail = msg => failures.push(msg);
 if (FILMS.length < 200) fail(`catalog has only ${FILMS.length} films; expected 200+`);
 
 const broken = FILMS.filter(f =>
-  !f.title || !f.runtime || f.runtime < 5 || !Array.isArray(f.genres) ||
+  !f.id || !f.title || !f.runtime || f.runtime < 5 || !Array.isArray(f.genres) ||
   !f.genres.length || !f.cert || typeof f.votes !== "number"
 );
 if (broken.length) fail(`${broken.length} films have missing fields, e.g. ${broken[0].title}`);
+
+const ids = new Set(FILMS.map(f => f.id));
+if (ids.size !== FILMS.length) fail(`${FILMS.length - ids.size} duplicate film ids`);
 
 const noPoster = FILMS.filter(f => !f.poster).length;
 if (noPoster > FILMS.length * 0.1) fail(`${noPoster} films have no poster (over 10%)`);

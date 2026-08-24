@@ -91,6 +91,9 @@ for (const id of ids) {
     const cert = us?.release_dates?.map(r => r.certification).find(Boolean) || "NR";
 
     films.push({
+      /* Stable across catalogue refreshes, unlike the title — this is what
+         "already seen" marks are keyed on. */
+      id: m.id,
       title: m.title,
       year: Number((m.release_date || "").slice(0, 4)) || null,
       runtime: m.runtime,
