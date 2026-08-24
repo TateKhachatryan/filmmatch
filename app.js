@@ -219,15 +219,22 @@ function wireSeenButtons(picks) {
 }
 
 function render() {
-  const a = state.answers;
-  const picks = window.FilmMatch.match(window.FILMS, a, {
+  const picks = window.FilmMatch.match(window.FILMS, state.answers, {
     count: 4,
     exclude: state.seen,
     excludeIds: FM.auth.isSignedIn() ? FM.auth.seenIds() : new Set()
   });
   state.shown = picks;
   state.seen = state.seen.concat(picks.map(p => p.title));
+  paint(picks);
+}
 
+/* Draws whatever has already been chosen. Kept separate from render() because
+   the session can resolve after the first paint — on a shared /r/... link the
+   results are on screen before we know whether anyone is signed in — and
+   re-running the match then would swap the viewer's films for different ones. */
+function paint(picks) {
+  const a = state.answers;
   const L = window.FilmMatch;
   $("#answer-chips").innerHTML = [
     L.MOOD_LABEL[a.mood], L.COMPANION_LABEL[a.companion],
@@ -403,6 +410,15 @@ if (FM.auth.configured) {
     FM.auth.onChange(() => {
       renderAccount(on);
       if (document.querySelector("#s-profile").classList.contains("is-on")) renderProfile();
+
+      /* Signing in — or arriving on a shared link before the session loads —
+         means the results on screen were drawn without the viewer's controls.
+         Repaint them; only re-match if the set now contains hidden films. */
+      if (document.querySelector("#s-results").classList.contains("is-on") && state.shown.length) {
+        const hidden = FM.auth.isSignedIn() ? FM.auth.seenIds() : new Set();
+        if (state.shown.some(f => hidden.has(f.id))) render();
+        else paint(state.shown);
+      }
     });
     await FM.auth.init();
     renderAccount(on);
